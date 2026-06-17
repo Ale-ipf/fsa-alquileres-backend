@@ -241,10 +241,11 @@
     ></script>
 
     <script>
-      // 🔥 NUEVA VARIABLE GLOBAL: Guardamos la lista cruda que viene del backend
       let todosLosAlquileres = [];
+      // 🔥 NUEVA VARIABLE GLOBAL: Para recordar quién está navegando y activar botones de borrado
+      let usuarioActual = null;
 
-      // 1. Verificar el estado de la sesión (Igual que antes)
+      // 1. Verificar el estado de la sesión
       async function verificarSesion() {
         try {
           const res = await fetch("/quien-soy");
@@ -260,6 +261,7 @@
           );
 
           if (info.logueado) {
+            usuarioActual = info.usuario; // 🔥 Guardamos el usuario globalmente
             columnaAuth.classList.add("d-none");
             barraUsuario.classList.remove("d-none");
             barraUsuario.classList.add("d-flex");
@@ -274,54 +276,49 @@
                 "ℹ️ Estás logueado como <strong>Estudiante</strong>. Podés usar los filtros abajo para buscar tu depto ideal.";
             }
           } else {
+            usuarioActual = null; // Nadie logueado
             columnaAuth.classList.remove("d-none");
             barraUsuario.classList.add("d-none");
           }
         } catch (e) {
           console.error("Error verificando sesión", e);
         }
+        // Importante: traemos los alquileres DESPUÉS de saber quién es el usuario
+        obtenerAlquileres();
       }
 
-      // 2. Traer los alquileres del backend una sola vez al cargar la página
+      // 2. Traer los alquileres del backend
       async function obtenerAlquileres() {
         try {
           const respuesta = await fetch("/alquileres");
-          todosLosAlquileres = await respuesta.json(); // Los guardamos en nuestra lista global
-          dibujarTarjetas(todosLosAlquileres); // Dibujamos todos al principio
+          todosLosAlquileres = await respuesta.json();
+          dibujarTarjetas(todosLosAlquileres);
         } catch (error) {
           console.error("Error al cargar alquileres:", error);
         }
       }
 
-      // 🔥 NUEVA FUNCIÓN: Filtra el array global y vuelve a dibujar la pantalla
+      // Filtra el array global y vuelve a dibujar la pantalla
       function aplicarFiltros() {
         const barrioSeleccionado =
           document.getElementById("filtro-barrio").value;
         const precioMaximo = document.getElementById("filtro-precio").value;
         const soloConAire = document.getElementById("filtro-aire").checked;
 
-        // Usamos la magia de .filter() de JavaScript
         const alquileresFiltrados = todosLosAlquileres.filter((alquiler) => {
-          // Filtro 1: Barrio
           const cumpleBarrio =
             barrioSeleccionado === "Todos" ||
             alquiler.barrio === barrioSeleccionado;
-
-          // Filtro 2: Precio
           const cumplePrecio =
             !precioMaximo || alquiler.precio <= Number(precioMaximo);
-
-          // Filtro 3: Aire
           const cumpleAire = !soloConAire || alquiler.tieneAire === true;
-
-          // Solo si cumple las 3 condiciones, el alquiler pasa el filtro
           return cumpleBarrio && cumplePrecio && cumpleAire;
         });
 
-        dibujarTarjetas(alquileresFiltrados); // Redibujamos la pantalla con el resultado
+        dibujarTarjetas(alquileresFiltrados);
       }
 
-      // FUNCIÓN AUXILIAR: Se encarga exclusivamente de meter las cards en el HTML
+      // Encargada de meter las cards en el HTML
       function dibujarTarjetas(lista) {
         const contenedor = document.getElementById("contenedor-alquileres");
         contenedor.innerHTML = "";
@@ -333,6 +330,17 @@
         }
 
         lista.forEach((alquiler) => {
+          // 🔥 LÓGICA INTELIGENTE: Verificamos si el dueño de esta tarjeta es el mismo logueado
+          let botonBorrarHtml = "";
+          if (usuarioActual && usuarioActual.email === alquiler.dueno) {
+            botonBorrarHtml = `
+                        <form action="/alquileres/borrar" method="POST" class="mt-3">
+                            <input type="hidden" name="idAlquiler" value="${alquiler.id}">
+                            <button type="submit" class="btn btn-sm btn-danger w-100 fw-bold">Borrar Publicación 🗑️</button>
+                        </form>
+                    `;
+          }
+
           contenedor.innerHTML += `
                     <div class="col-md-4">
                         <div class="card h-100 shadow-sm border-0">
@@ -343,7 +351,7 @@
                                 <p class="card-text text-muted mb-2">
                                     ${alquiler.tieneAire ? "❄️ Tiene Aire Acondicionado" : "💨 Ventilador de techo"}
                                 </p>
-                            </div>
+                                ${botonBorrarHtml} </div>
                             <div class="card-footer bg-transparent border-0 text-muted small pb-3">
                                 👤 Publicado por: ${alquiler.dueno}
                             </div>
@@ -353,9 +361,8 @@
         });
       }
 
-      // Ejecutar al iniciar la web
+      // Ejecutar al iniciar la web (Solo llamamos a verificarSesion porque esta llama a obtenerAlquileres al final)
       verificarSesion();
-      obtenerAlquileres();
     </script>
   </body>
 </html>

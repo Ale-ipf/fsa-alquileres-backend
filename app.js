@@ -140,6 +140,40 @@ app.get('/alquileres', (req, res) => {
     res.json(alquileres);
 });
 
+// 🔥 NUEVA RUTA: Borrar un alquiler específico
+app.post('/alquileres/borrar', (req, res) => {
+    // 1. Verificamos que haya alguien logueado
+    if (!req.session.usuarioLogueado) {
+        return res.status(401).send('Error: Debes iniciar sesión.');
+    }
+
+    const { idAlquiler } = req.body;
+    const emailUsuarioActual = req.session.usuarioLogueado.email;
+
+    const alquileres = leerAlquileresDeDisco();
+    
+    // 2. Buscamos el alquiler que queremos borrar
+    const alquilerEncontrado = alquileres.find(a => a.id === Number(idAlquiler));
+
+    if (!alquilerEncontrado) {
+        return res.status(404).send('Error: El alquiler no existe.');
+    }
+
+    // 3. SEGURIDAD: Validamos que el usuario logueado sea el MISMO dueño que publicó el aviso
+    if (alquilerEncontrado.dueno !== emailUsuarioActual) {
+        return res.status(403).send('Error: No tienes permiso para borrar este alquiler ❌');
+    }
+
+    // 4. Lo filtramos para sacarlo de la lista (nos quedamos con todos los que NO tengan ese ID)
+    const alquileresActualizados = alquileres.filter(a => a.id !== Number(idAlquiler));
+    
+    // 5. Guardamos la nueva lista limpia en el disco
+    guardarAlquileresEnDisco(alquileresActualizados);
+
+    // 6. Redirigimos al inicio para que vea el cambio al toque
+    res.redirect('/');
+});
+
 app.listen(PUERTO, () => {
     console.log(`Servidor con Login corriendo en http://localhost:${PUERTO}`);
 });
