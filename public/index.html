@@ -13,45 +13,88 @@
   </head>
   <body class="bg-light">
     <div class="container py-5">
-      <h1 class="text-center text-danger mb-5 fw-bold">
+      <h1 class="text-center text-danger mb-4 fw-bold">
         Alquileres Formosa 🏠
       </h1>
 
+      <div
+        id="barra-usuario"
+        class="alert alert-info d-none justify-content-between align-items-center shadow-sm mb-4"
+      >
+        <span id="texto-bienvenida" class="fw-bold fs-5"></span>
+        <a href="/logout" class="btn btn-outline-danger btn-sm fw-bold"
+          >Cerrar Sesión ❌</a
+        >
+      </div>
+
       <div class="row g-4 mb-5">
-        <div class="col-md-6">
+        <div class="col-md-6" id="columna-auth">
           <div
-            class="card shadow-sm border-0 border-top border-danger border-4 p-4"
+            class="card shadow-sm border-0 border-top border-danger border-4 p-4 mb-4"
           >
-            <h3 class="card-title mb-4 fw-bold">Crear Cuenta</h3>
+            <h3 class="card-title mb-3 fw-bold">Crear Cuenta</h3>
             <form action="/registro" method="POST">
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Email</label>
+              <div class="mb-2">
+                <label class="form-label small fw-semibold">Email</label>
                 <input
                   type="email"
                   name="email"
-                  class="form-control"
-                  placeholder="ejemplo@mail.com"
+                  class="form-control form-control-sm"
                   required
                 />
               </div>
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Contraseña</label>
+              <div class="mb-2">
+                <label class="form-label small fw-semibold">Contraseña</label>
                 <input
                   type="password"
                   name="password"
-                  class="form-control"
+                  class="form-control form-control-sm"
                   required
                 />
               </div>
               <div class="mb-3">
-                <label class="form-label fw-semibold">¿Qué perfil sos?</label>
-                <select name="rol" class="form-select" required>
+                <label class="form-label small fw-semibold"
+                  >¿Qué perfil sos?</label
+                >
+                <select name="rol" class="form-select form-select-sm" required>
                   <option value="cliente">Soy Estudiante (Busco)</option>
                   <option value="dueno">Soy Dueño (Ofrezco)</option>
                 </select>
               </div>
-              <button type="submit" class="btn btn-danger w-100 fw-bold">
+              <button type="submit" class="btn btn-danger btn-sm w-100 fw-bold">
                 Registrarme
+              </button>
+            </form>
+          </div>
+
+          <div
+            class="card shadow-sm border-0 border-top border-primary border-4 p-4"
+          >
+            <h3 class="card-title mb-3 fw-bold">Iniciar Sesión</h3>
+            <form action="/login" method="POST">
+              <div class="mb-2">
+                <label class="form-label small fw-semibold">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  class="form-control form-control-sm"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-semibold">Contraseña</label>
+                <input
+                  type="password"
+                  name="password"
+                  class="form-control form-control-sm"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                class="btn btn-primary btn-sm w-100 fw-bold"
+              >
+                Ingresar 🚀
               </button>
             </form>
           </div>
@@ -59,22 +102,28 @@
 
         <div class="col-md-6">
           <div
-            class="card shadow-sm border-0 border-top border-dark border-4 p-4"
+            class="card shadow-sm border-0 border-top border-dark border-4 p-4 h-100"
+            id="card-publicar"
           >
-            <h3 class="card-title mb-4 fw-bold">
-              Publicar Alquiler (Solo Dueños)
-            </h3>
-            <form action="/alquileres" method="POST">
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Tu Email de Dueño</label>
-                <input
-                  type="email"
-                  name="emailDueno"
-                  class="form-control"
-                  placeholder="Debe estar registrado"
-                  required
-                />
-              </div>
+            <h3 class="card-title mb-4 fw-bold">Publicar Alquiler</h3>
+
+            <div
+              id="cartel-bloqueo"
+              class="alert alert-warning my-auto text-center"
+            >
+              🔒 Debes iniciar sesión como <strong>Dueño</strong> para publicar
+              una propiedad.
+            </div>
+
+            <form
+              action="/alquileres"
+              method="POST"
+              id="form-publicar"
+              class="d-none"
+            >
+              <p class="text-muted small">
+                Publicando como: <strong id="email-sesion-publicar"></strong>
+              </p>
               <div class="mb-3">
                 <label class="form-label fw-semibold">Título del Anuncio</label>
                 <input
@@ -142,15 +191,56 @@
     ></script>
 
     <script>
-      // Función que va a buscar los datos a nuestro servidor Express
+      // 1. Verificar el estado de la sesión apenas entramos
+      async function verificarSesion() {
+        try {
+          const res = await fetch("/quien-soy");
+          const info = await res.json();
+
+          const barraUsuario = document.getElementById("barra-usuario");
+          const textoBienvenida = document.getElementById("texto-bienvenida");
+          const columnaAuth = document.getElementById("columna-auth");
+          const cartelBloqueo = document.getElementById("cartel-bloqueo");
+          const formPublicar = document.getElementById("form-publicar");
+          const emailSesionPublicar = document.getElementById(
+            "email-sesion-publicar",
+          );
+
+          if (info.logueado) {
+            // Ocultamos los formularios de registro/login
+            columnaAuth.classList.add("d-none");
+
+            // Mostramos la barra de bienvenida
+            barraUsuario.classList.remove("d-none");
+            barraUsuario.classList.add("d-flex");
+            textoBienvenida.innerText = `¡Hola, ${info.usuario.email} (${info.usuario.rol.toUpperCase()})! 👋`;
+
+            // Si es dueño, le habilitamos el formulario de publicación
+            if (info.usuario.rol === "dueno") {
+              cartelBloqueo.classList.add("d-none");
+              formPublicar.classList.remove("d-none");
+              emailSesionPublicar.innerText = info.usuario.email;
+            } else {
+              cartelBloqueo.innerHTML =
+                "ℹ️ Estás logueado como <strong>Estudiante</strong>. Podés ver las ofertas abajo, pero solo los dueños pueden publicar.";
+            }
+          } else {
+            // Si no está logueado, nos aseguramos de que vea los formularios de acceso
+            columnaAuth.classList.remove("d-none");
+            barraUsuario.classList.add("d-none");
+          }
+        } catch (e) {
+          console.error("Error verificando sesión", e);
+        }
+      }
+
+      // 2. Cargar las tarjetas de alquileres (Igual que antes)
       async function cargarAlquileres() {
         try {
-          // Hacemos el pedido HTTP GET a la ruta que ya programamos en el backend
           const respuesta = await fetch("/alquileres");
           const listaAlquileres = await respuesta.json();
-
           const contenedor = document.getElementById("contenedor-alquileres");
-          contenedor.innerHTML = ""; // Limpiamos el texto de cargando
+          contenedor.innerHTML = "";
 
           if (listaAlquileres.length === 0) {
             contenedor.innerHTML =
@@ -158,9 +248,8 @@
             return;
           }
 
-          // Recorremos cada alquiler y creamos una tarjeta Bootstrap en el aire
           listaAlquileres.forEach((alquiler) => {
-            const cardHtml = `
+            contenedor.innerHTML += `
                         <div class="col-md-4">
                             <div class="card h-100 shadow-sm border-0">
                                 <div class="card-body">
@@ -172,22 +261,19 @@
                                     </p>
                                 </div>
                                 <div class="card-footer bg-transparent border-0 text-muted small pb-3">
-                                    👤 Contacto: ${alquiler.dueno}
+                                    👤 Publicado por: ${alquiler.dueno}
                                 </div>
                             </div>
                         </div>
                     `;
-            // Agregamos la tarjeta al contenedor de la pantalla
-            contenedor.innerHTML += cardHtml;
           });
         } catch (error) {
           console.error("Error al cargar alquileres:", error);
-          document.getElementById("contenedor-alquileres").innerHTML =
-            '<p class="text-danger">Error de conexión con el servidor.</p>';
         }
       }
 
-      // Ejecutamos la función automáticamente apenas se abre la página
+      // Ejecutar las dos comprobaciones al cargar la página
+      verificarSesion();
       cargarAlquileres();
     </script>
   </body>
