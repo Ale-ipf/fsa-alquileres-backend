@@ -174,6 +174,44 @@ app.post('/alquileres/borrar', (req, res) => {
     res.redirect('/');
 });
 
+// 🔥 NUEVA RUTA: Editar el precio de un alquiler específico
+app.post('/alquileres/editar-precio', (req, res) => {
+    // 1. Validación de sesión
+    if (!req.session.usuarioLogueado) {
+        return res.status(401).json({ error: 'Debes iniciar sesión.' });
+    }
+
+    const { idAlquiler, nuevoPrecio } = req.body;
+    const emailUsuarioActual = req.session.usuarioLogueado.email;
+
+    if (!nuevoPrecio || isNaN(nuevoPrecio) || Number(nuevoPrecio) <= 0) {
+        return res.status(400).json({ error: 'Precio inválido.' });
+    }
+
+    const alquileres = leerAlquileresDeDisco();
+    
+    // 2. Buscamos el alquiler a editar
+    const alquilerEncontrado = alquileres.find(a => a.id === Number(idAlquiler));
+
+    if (!alquilerEncontrado) {
+        return res.status(404).json({ error: 'El alquiler no existe.' });
+    }
+
+    // 3. SEGURIDAD: Validamos que el que edita sea el dueño real
+    if (alquilerEncontrado.dueno !== emailUsuarioActual) {
+        return res.status(403).json({ error: 'No tienes permiso para editar este alquiler ❌' });
+    }
+
+    // 4. Modificamos el precio en la lista
+    alquilerEncontrado.precio = Number(nuevoPrecio);
+    
+    // 5. Guardamos los cambios en el archivo JSON
+    guardarAlquileresEnDisco(alquileres);
+
+    // 6. Respondemos con un OK en formato JSON (ya que esta petición se hace "en silencio" desde el frontend)
+    res.json({ exito: true });
+});
+
 app.listen(PUERTO, () => {
     console.log(`Servidor con Login corriendo en http://localhost:${PUERTO}`);
 });
