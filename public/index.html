@@ -10,6 +10,13 @@
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous"
     />
+    <style>
+      /* Un pequeño toque estético para que todas las fotos tengan la misma altura */
+      .card-img-top {
+        height: 200px;
+        object-fit: cover;
+      }
+    </style>
   </head>
   <body class="bg-light">
     <div class="container py-5">
@@ -118,6 +125,7 @@
             <form
               action="/alquileres"
               method="POST"
+              enctype="multipart/form-data"
               id="form-publicar"
               class="d-none"
             >
@@ -153,6 +161,18 @@
                     <option value="UNaF">Cerca de la UNaF</option>
                   </select>
                 </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold"
+                  >Foto del Inmueble 📸</label
+                >
+                <input
+                  type="file"
+                  name="foto"
+                  class="form-control"
+                  accept="image/*"
+                  required
+                />
               </div>
               <div class="mb-3 form-check">
                 <input
@@ -280,7 +300,7 @@
             barraUsuario.classList.add("d-none");
           }
         } catch (e) {
-          console.error("Error verificando sesión", e);
+          console.error("Error verifying session", e);
         }
         obtenerAlquileres();
       }
@@ -328,24 +348,24 @@
         }
 
         lista.forEach((alquiler) => {
-          // 🔥 MODIFICACIÓN: Agregamos botones de Editar y Borrar juntos si es el dueño
           let accionesDuenoHtml = "";
           if (usuarioActual && usuarioActual.email === alquiler.dueno) {
             accionesDuenoHtml = `
                         <div class="mt-3 d-flex gap-2">
                             <button onclick="modificarPrecio(${alquiler.id}, ${alquiler.precio})" class="btn btn-sm btn-warning w-50 fw-bold text-dark">Editar Precio ✏️</button>
-                            
                             <form action="/alquileres/borrar" method="POST" class="w-50">
                                 <input type="hidden" name="idAlquiler" value="${alquiler.id}">
-                                <button type="submit" class="btn btn-sm btn-danger w-100 fw-bold">Borrar 🗑️</button>
+                                <button type="submit" class="btn btn-sm btn-danger w-100 fw-bold">Borrar</button>
                             </form>
                         </div>
                     `;
           }
 
+          // 🔥 MODIFICACIÓN CLAVE: Agregamos la etiqueta <img> arriba del todo en la tarjeta de Bootstrap
           contenedor.innerHTML += `
                     <div class="col-md-4">
-                        <div class="card h-100 shadow-sm border-0">
+                        <div class="card h-100 shadow-sm border-0 overflow-hidden">
+                            <img src="${alquiler.imagen}" class="card-img-top" alt="Foto del departamento">
                             <div class="card-body">
                                 <span class="badge bg-danger mb-2">Barrio ${alquiler.barrio}</span>
                                 <h5 class="card-title fw-bold">${alquiler.titulo}</h5>
@@ -364,40 +384,29 @@
         });
       }
 
-      // 🔥 NUEVA FUNCIÓN FRONTEND: Abre la cajita y le avisa al backend
+      // Modificar precio asincrónicamente
       async function modificarPrecio(id, precioActual) {
         const nuevoPrecio = prompt(
-          `El precio actual es $${precioActual.toLocaleString("es-AR")}.\n¿Cuál es el nuevo precio que querés poner?`,
+          `El precio actual es $${precioActual.toLocaleString("es-AR")}.\n¿Cuál es el nuevo precio?`,
           precioActual,
         );
-
-        // Si el usuario canceló o no puso nada, nos vamos
         if (nuevoPrecio === null || nuevoPrecio.trim() === "") return;
-
         if (isNaN(nuevoPrecio) || Number(nuevoPrecio) <= 0) {
-          alert("Por favor, ingresá un número de precio válido.");
+          alert("Ingresá un número válido.");
           return;
         }
 
         try {
-          // Mandamos la info al backend en formato URL-Encoded igual que un formulario tradicional
           const respuesta = await fetch("/alquileres/editar-precio", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: `idAlquiler=${id}&nuevoPrecio=${nuevoPrecio}`,
           });
-
           const resultado = await respuesta.json();
-
-          if (resultado.exito) {
-            // Si el servidor guardó todo bien, volvemos a pedir la lista para refrescar la pantalla
-            verificarSesion();
-          } else {
-            alert("Error: " + resultado.error);
-          }
+          if (resultado.exito) verificarSesion();
+          else alert("Error: " + resultado.error);
         } catch (error) {
           console.error("Error al editar:", error);
-          alert("Hubo un error de conexión al intentar editar el precio.");
         }
       }
 
