@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alquileres Formosa 🏠</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body class="bg-light">
+    <div class="container py-5">
+      <h1 class="text-center text-danger mb-5 fw-bold">
+        Alquileres Formosa 🏠
+      </h1>
+
+      <div class="row g-4 mb-5">
+        <div class="col-md-6">
+          <div
+            class="card shadow-sm border-0 border-top border-danger border-4 p-4"
+          >
+            <h3 class="card-title mb-4 fw-bold">Crear Cuenta</h3>
+            <form action="/registro" method="POST">
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  class="form-control"
+                  placeholder="ejemplo@mail.com"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Contraseña</label>
+                <input
+                  type="password"
+                  name="password"
+                  class="form-control"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">¿Qué perfil sos?</label>
+                <select name="rol" class="form-select" required>
+                  <option value="cliente">Soy Estudiante (Busco)</option>
+                  <option value="dueno">Soy Dueño (Ofrezco)</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-danger w-100 fw-bold">
+                Registrarme
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div
+            class="card shadow-sm border-0 border-top border-dark border-4 p-4"
+          >
+            <h3 class="card-title mb-4 fw-bold">
+              Publicar Alquiler (Solo Dueños)
+            </h3>
+            <form action="/alquileres" method="POST">
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Tu Email de Dueño</label>
+                <input
+                  type="email"
+                  name="emailDueno"
+                  class="form-control"
+                  placeholder="Debe estar registrado"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Título del Anuncio</label>
+                <input
+                  type="text"
+                  name="titulo"
+                  class="form-control"
+                  placeholder="Ej: Monoambiente a estrenar"
+                  required
+                />
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-semibold">Precio ($)</label>
+                  <input
+                    type="number"
+                    name="precio"
+                    class="form-control"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-semibold">Barrio</label>
+                  <select name="barrio" class="form-select">
+                    <option value="Centro">Centro</option>
+                    <option value="San Miguel">San Miguel</option>
+                    <option value="Guadalupe">Guadalupe</option>
+                    <option value="UNaF">Cerca de la UNaF</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-3 form-check">
+                <input
+                  type="checkbox"
+                  name="tieneAire"
+                  value="si"
+                  class="form-check-input"
+                  id="aire"
+                />
+                <label class="form-check-label" for="aire"
+                  >¿Tiene Aire Acondicionado? ❄️</label
+                >
+              </div>
+              <button type="submit" class="btn btn-dark w-100 fw-bold">
+                Publicar Propiedad
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-5" />
+
+      <h2 class="mb-4 fw-bold text-secondary">
+        Alquileres Disponibles en Formosa 🔍
+      </h2>
+      <div id="contenedor-alquileres" class="row g-4">
+        <p class="text-muted">Cargando alquileres de la base de datos...</p>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+
+    <script>
+      // Función que va a buscar los datos a nuestro servidor Express
+      async function cargarAlquileres() {
+        try {
+          // Hacemos el pedido HTTP GET a la ruta que ya programamos en el backend
+          const respuesta = await fetch("/alquileres");
+          const listaAlquileres = await respuesta.json();
+
+          const contenedor = document.getElementById("contenedor-alquileres");
+          contenedor.innerHTML = ""; // Limpiamos el texto de cargando
+
+          if (listaAlquileres.length === 0) {
+            contenedor.innerHTML =
+              '<div class="col-12"><p class="alert alert-warning">No hay alquileres cargados todavía, Rey.</p></div>';
+            return;
+          }
+
+          // Recorremos cada alquiler y creamos una tarjeta Bootstrap en el aire
+          listaAlquileres.forEach((alquiler) => {
+            const cardHtml = `
+                        <div class="col-md-4">
+                            <div class="card h-100 shadow-sm border-0">
+                                <div class="card-body">
+                                    <span class="badge bg-danger mb-2">Barrio ${alquiler.barrio}</span>
+                                    <h5 class="card-title fw-bold">${alquiler.titulo}</h5>
+                                    <p class="card-text text-success fs-4 fw-bold">$${alquiler.precio.toLocaleString("es-AR")}</p>
+                                    <p class="card-text text-muted mb-2">
+                                        ${alquiler.tieneAire ? "❄️ Tiene Aire Acondicionado" : "💨 Ventilador de techo"}
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 text-muted small pb-3">
+                                    👤 Contacto: ${alquiler.dueno}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+            // Agregamos la tarjeta al contenedor de la pantalla
+            contenedor.innerHTML += cardHtml;
+          });
+        } catch (error) {
+          console.error("Error al cargar alquileres:", error);
+          document.getElementById("contenedor-alquileres").innerHTML =
+            '<p class="text-danger">Error de conexión con el servidor.</p>';
+        }
+      }
+
+      // Ejecutamos la función automáticamente apenas se abre la página
+      cargarAlquileres();
+    </script>
+  </body>
+</html>
