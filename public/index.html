@@ -176,8 +176,58 @@
 
       <hr class="my-5" />
 
+      <div class="card shadow-sm border-0 p-4 mb-4 bg-white">
+        <h4 class="fw-bold text-secondary mb-3">🔎 ¿Qué estás buscando hoy?</h4>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold text-muted"
+              >Filtrar por Barrio</label
+            >
+            <select
+              id="filtro-barrio"
+              class="form-select"
+              onchange="aplicarFiltros()"
+            >
+              <option value="Todos">🏡 Todos los barrios</option>
+              <option value="Centro">Centro</option>
+              <option value="San Miguel">San Miguel</option>
+              <option value="Guadalupe">Guadalupe</option>
+              <option value="UNaF">Cerca de la UNaF</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold text-muted"
+              >Precio Máximo ($)</label
+            >
+            <input
+              type="number"
+              id="filtro-precio"
+              class="form-control"
+              placeholder="Ej: 200000"
+              oninput="aplicarFiltros()"
+            />
+          </div>
+          <div class="col-md-4 d-flex align-items-end">
+            <div class="form-check mb-2">
+              <input
+                type="checkbox"
+                id="filtro-aire"
+                class="form-check-input"
+                onchange="aplicarFiltros()"
+              />
+              <label
+                class="form-check-label fw-semibold text-muted"
+                for="filtro-aire"
+              >
+                Solo con Aire Acondicionado ❄️
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <h2 class="mb-4 fw-bold text-secondary">
-        Alquileres Disponibles en Formosa 🔍
+        Alquileres Disponibles en Formosa
       </h2>
       <div id="contenedor-alquileres" class="row g-4">
         <p class="text-muted">Cargando alquileres de la base de datos...</p>
@@ -191,7 +241,10 @@
     ></script>
 
     <script>
-      // 1. Verificar el estado de la sesión apenas entramos
+      // 🔥 NUEVA VARIABLE GLOBAL: Guardamos la lista cruda que viene del backend
+      let todosLosAlquileres = [];
+
+      // 1. Verificar el estado de la sesión (Igual que antes)
       async function verificarSesion() {
         try {
           const res = await fetch("/quien-soy");
@@ -207,25 +260,20 @@
           );
 
           if (info.logueado) {
-            // Ocultamos los formularios de registro/login
             columnaAuth.classList.add("d-none");
-
-            // Mostramos la barra de bienvenida
             barraUsuario.classList.remove("d-none");
             barraUsuario.classList.add("d-flex");
             textoBienvenida.innerText = `¡Hola, ${info.usuario.email} (${info.usuario.rol.toUpperCase()})! 👋`;
 
-            // Si es dueño, le habilitamos el formulario de publicación
             if (info.usuario.rol === "dueno") {
               cartelBloqueo.classList.add("d-none");
               formPublicar.classList.remove("d-none");
               emailSesionPublicar.innerText = info.usuario.email;
             } else {
               cartelBloqueo.innerHTML =
-                "ℹ️ Estás logueado como <strong>Estudiante</strong>. Podés ver las ofertas abajo, pero solo los dueños pueden publicar.";
+                "ℹ️ Estás logueado como <strong>Estudiante</strong>. Podés usar los filtros abajo para buscar tu depto ideal.";
             }
           } else {
-            // Si no está logueado, nos aseguramos de que vea los formularios de acceso
             columnaAuth.classList.remove("d-none");
             barraUsuario.classList.add("d-none");
           }
@@ -234,47 +282,80 @@
         }
       }
 
-      // 2. Cargar las tarjetas de alquileres (Igual que antes)
-      async function cargarAlquileres() {
+      // 2. Traer los alquileres del backend una sola vez al cargar la página
+      async function obtenerAlquileres() {
         try {
           const respuesta = await fetch("/alquileres");
-          const listaAlquileres = await respuesta.json();
-          const contenedor = document.getElementById("contenedor-alquileres");
-          contenedor.innerHTML = "";
-
-          if (listaAlquileres.length === 0) {
-            contenedor.innerHTML =
-              '<div class="col-12"><p class="alert alert-warning">No hay alquileres cargados todavía, Rey.</p></div>';
-            return;
-          }
-
-          listaAlquileres.forEach((alquiler) => {
-            contenedor.innerHTML += `
-                        <div class="col-md-4">
-                            <div class="card h-100 shadow-sm border-0">
-                                <div class="card-body">
-                                    <span class="badge bg-danger mb-2">Barrio ${alquiler.barrio}</span>
-                                    <h5 class="card-title fw-bold">${alquiler.titulo}</h5>
-                                    <p class="card-text text-success fs-4 fw-bold">$${alquiler.precio.toLocaleString("es-AR")}</p>
-                                    <p class="card-text text-muted mb-2">
-                                        ${alquiler.tieneAire ? "❄️ Tiene Aire Acondicionado" : "💨 Ventilador de techo"}
-                                    </p>
-                                </div>
-                                <div class="card-footer bg-transparent border-0 text-muted small pb-3">
-                                    👤 Publicado por: ${alquiler.dueno}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-          });
+          todosLosAlquileres = await respuesta.json(); // Los guardamos en nuestra lista global
+          dibujarTarjetas(todosLosAlquileres); // Dibujamos todos al principio
         } catch (error) {
           console.error("Error al cargar alquileres:", error);
         }
       }
 
-      // Ejecutar las dos comprobaciones al cargar la página
+      // 🔥 NUEVA FUNCIÓN: Filtra el array global y vuelve a dibujar la pantalla
+      function aplicarFiltros() {
+        const barrioSeleccionado =
+          document.getElementById("filtro-barrio").value;
+        const precioMaximo = document.getElementById("filtro-precio").value;
+        const soloConAire = document.getElementById("filtro-aire").checked;
+
+        // Usamos la magia de .filter() de JavaScript
+        const alquileresFiltrados = todosLosAlquileres.filter((alquiler) => {
+          // Filtro 1: Barrio
+          const cumpleBarrio =
+            barrioSeleccionado === "Todos" ||
+            alquiler.barrio === barrioSeleccionado;
+
+          // Filtro 2: Precio
+          const cumplePrecio =
+            !precioMaximo || alquiler.precio <= Number(precioMaximo);
+
+          // Filtro 3: Aire
+          const cumpleAire = !soloConAire || alquiler.tieneAire === true;
+
+          // Solo si cumple las 3 condiciones, el alquiler pasa el filtro
+          return cumpleBarrio && cumplePrecio && cumpleAire;
+        });
+
+        dibujarTarjetas(alquileresFiltrados); // Redibujamos la pantalla con el resultado
+      }
+
+      // FUNCIÓN AUXILIAR: Se encarga exclusivamente de meter las cards en el HTML
+      function dibujarTarjetas(lista) {
+        const contenedor = document.getElementById("contenedor-alquileres");
+        contenedor.innerHTML = "";
+
+        if (lista.length === 0) {
+          contenedor.innerHTML =
+            '<div class="col-12"><p class="alert alert-warning text-center">No encontramos alquileres que coincidan con tu búsqueda, Rey. 🔍</p></div>';
+          return;
+        }
+
+        lista.forEach((alquiler) => {
+          contenedor.innerHTML += `
+                    <div class="col-md-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <span class="badge bg-danger mb-2">Barrio ${alquiler.barrio}</span>
+                                <h5 class="card-title fw-bold">${alquiler.titulo}</h5>
+                                <p class="card-text text-success fs-4 fw-bold">$${alquiler.precio.toLocaleString("es-AR")}</p>
+                                <p class="card-text text-muted mb-2">
+                                    ${alquiler.tieneAire ? "❄️ Tiene Aire Acondicionado" : "💨 Ventilador de techo"}
+                                </p>
+                            </div>
+                            <div class="card-footer bg-transparent border-0 text-muted small pb-3">
+                                👤 Publicado por: ${alquiler.dueno}
+                            </div>
+                        </div>
+                    </div>
+                `;
+        });
+      }
+
+      // Ejecutar al iniciar la web
       verificarSesion();
-      cargarAlquileres();
+      obtenerAlquileres();
     </script>
   </body>
 </html>
