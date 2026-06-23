@@ -54,8 +54,8 @@
               <p class="text-muted small">
                 Publicando como: <strong id="email-sesion-publicar"></strong>
               </p>
-              <div class="row">
-                <div class="col-md-4 mb-3">
+              <div class="row g-3">
+                <div class="col-md-4">
                   <label class="form-label fw-semibold"
                     >Título del Anuncio</label
                   >
@@ -67,7 +67,7 @@
                     required
                   />
                 </div>
-                <div class="col-md-2 mb-3">
+                <div class="col-md-2">
                   <label class="form-label fw-semibold">Precio ($)</label>
                   <input
                     type="number"
@@ -76,7 +76,7 @@
                     required
                   />
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2">
                   <label class="form-label fw-semibold">Barrio</label>
                   <select name="barrio" class="form-select">
                     <option value="Centro">Centro</option>
@@ -85,7 +85,22 @@
                     <option value="UNaF">Cerca de la UNaF</option>
                   </select>
                 </div>
-                <div class="col-md-3 mb-3">
+                <div class="col-md-2">
+                  <label class="form-label fw-semibold">Ambientes</label>
+                  <select name="ambientes" class="form-select" required>
+                    <option value="1">Monoambiente</option>
+                    <option value="2">2 Ambientes</option>
+                    <option value="3">3 Ambientes</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label fw-semibold">Tipo</label>
+                  <select name="tipoInmueble" class="form-select" required>
+                    <option value="Directo">Dueño Directo</option>
+                    <option value="Inmobiliaria">Inmobiliaria</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
                   <label class="form-label fw-semibold"
                     >Foto del Inmueble 📸</label
                   >
@@ -99,7 +114,7 @@
                 </div>
               </div>
               <div
-                class="d-flex justify-content-between align-items-center mt-2"
+                class="d-flex justify-content-between align-items-center mt-3"
               >
                 <div class="form-check">
                   <input
@@ -123,11 +138,13 @@
       </div>
 
       <div class="card shadow-sm border-0 p-4 mb-4 bg-white">
-        <h4 class="fw-bold text-secondary mb-3">🔎 ¿Qué estás buscando hoy?</h4>
+        <h4 class="fw-bold text-secondary mb-3">
+          🔎 Filtros de Búsqueda Avanzada
+        </h4>
         <div class="row g-3">
-          <div class="col-md-4">
+          <div class="col-md-3">
             <label class="form-label small fw-semibold text-muted"
-              >Filtrar por Barrio</label
+              >Barrio</label
             >
             <select
               id="filtro-barrio"
@@ -141,7 +158,50 @@
               <option value="UNaF">Cerca de la UNaF</option>
             </select>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold text-muted"
+              >Cantidad de Ambientes</label
+            >
+            <select
+              id="filtro-ambientes"
+              class="form-select"
+              onchange="aplicarFiltros()"
+            >
+              <option value="Todos">🚪 Cualquier cantidad</option>
+              <option value="1">Monoambiente</option>
+              <option value="2">2 Ambientes</option>
+              <option value="3">3 Ambientes</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold text-muted"
+              >Publicado por</label
+            >
+            <select
+              id="filtro-tipo"
+              class="form-select"
+              onchange="aplicarFiltros()"
+            >
+              <option value="Todos">🤝 Todos (Directo/Inmobiliaria)</option>
+              <option value="Directo">Dueño Directo</option>
+              <option value="Inmobiliaria">Inmobiliaria</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold text-muted"
+              >Ordenar por Precio</label
+            >
+            <select
+              id="orden-precio"
+              class="form-select"
+              onchange="aplicarFiltros()"
+            >
+              <option value="Defecto">Sin ordenar</option>
+              <option value="MenorMayor">💰 Menor a Mayor</option>
+              <option value="MayorMenor">💎 Mayor a Menor</option>
+            </select>
+          </div>
+          <div class="col-md-6">
             <label class="form-label small fw-semibold text-muted"
               >Precio Máximo ($)</label
             >
@@ -149,11 +209,11 @@
               type="number"
               id="filtro-precio"
               class="form-control"
-              placeholder="Ej: 200000"
+              placeholder="Ej: 250000"
               oninput="aplicarFiltros()"
             />
           </div>
-          <div class="col-md-4 d-flex align-items-end">
+          <div class="col-md-6 d-flex align-items-end">
             <div class="form-check mb-2">
               <input
                 type="checkbox"
@@ -184,7 +244,6 @@
       let todosLosAlquileres = [];
       let usuarioActual = null;
 
-      // 1. Verificar sesión y adaptar la visual
       async function verificarSesion() {
         try {
           const res = await fetch("/quien-soy");
@@ -200,16 +259,11 @@
 
           if (info.logueado) {
             usuarioActual = info.usuario;
-
-            // Ocultamos los botones de login/registro de arriba
             botonesInvitado.classList.add("d-none");
-
-            // Mostramos bienvenida
             barraUsuario.classList.remove("d-none");
             barraUsuario.classList.add("d-flex");
             textoBienvenida.innerText = `¡Hola, ${info.usuario.email} (${info.usuario.rol.toUpperCase()})! 👋`;
 
-            // Si es dueño, desplegamos la zona de publicación a lo ancho
             if (info.usuario.rol === "dueno") {
               seccionPublicar.classList.remove("d-none");
               emailSesionPublicar.innerText = info.usuario.email;
@@ -236,22 +290,53 @@
         }
       }
 
+      // 🔥 MODIFICADA: La función ahora aplica TODOS los nuevos filtros y ordena
       function aplicarFiltros() {
         const barrioSeleccionado =
           document.getElementById("filtro-barrio").value;
+        const ambientesSeleccionados =
+          document.getElementById("filtro-ambientes").value;
+        const tipoSeleccionado = document.getElementById("filtro-tipo").value;
         const precioMaximo = document.getElementById("filtro-precio").value;
         const soloConAire = document.getElementById("filtro-aire").checked;
+        const ordenPrecio = document.getElementById("orden-precio").value;
 
-        const alquileresFiltrados = todosLosAlquileres.filter((alquiler) => {
+        // 1. Filtramos el array
+        let alquileresFiltrados = todosLosAlquileres.filter((alquiler) => {
           const cumpleBarrio =
             barrioSeleccionado === "Todos" ||
             alquiler.barrio === barrioSeleccionado;
+          // (Para compatibilidad, si un depto viejo no tiene "ambientes", asumimos 1)
+          const deptoAmbientes = alquiler.ambientes || 1;
+          const cumpleAmbientes =
+            ambientesSeleccionados === "Todos" ||
+            deptoAmbientes === Number(ambientesSeleccionados);
+
+          const deptoTipo = alquiler.tipoInmueble || "Directo";
+          const cumpleTipo =
+            tipoSeleccionado === "Todos" || deptoTipo === tipoSeleccionado;
+
           const cumplePrecio =
             !precioMaximo || alquiler.precio <= Number(precioMaximo);
           const cumpleAire = !soloConAire || alquiler.tieneAire === true;
-          return cumpleBarrio && cumplePrecio && cumpleAire;
+
+          return (
+            cumpleBarrio &&
+            cumpleAmbientes &&
+            cumpleTipo &&
+            cumplePrecio &&
+            cumpleAire
+          );
         });
 
+        // 2. 🔥 ORDENAMOS el resultado usando la función .sort() de JS
+        if (ordenPrecio === "MenorMayor") {
+          alquileresFiltrados.sort((a, b) => a.precio - b.precio);
+        } else if (ordenPrecio === "MayorMenor") {
+          alquileresFiltrados.sort((a, b) => b.precio - a.precio);
+        }
+
+        // 3. Dibujamos en pantalla
         dibujarTarjetas(alquileresFiltrados);
       }
 
@@ -261,7 +346,7 @@
 
         if (lista.length === 0) {
           contenedor.innerHTML =
-            '<div class="col-12"><p class="alert alert-warning text-center">No encontramos alquileres que coincidan con tu búsqueda, Rey. 🔍</p></div>';
+            '<div class="col-12"><p class="alert alert-warning text-center">No encontramos alquileres con esos filtros, Rey. 🔍</p></div>';
           return;
         }
 
@@ -279,12 +364,23 @@
                     `;
           }
 
+          // Traducimos los ambientes a un texto amigable
+          let textoAmbientes = "Monoambiente";
+          if (alquiler.ambientes === 2) textoAmbientes = "2 Ambientes";
+          if (alquiler.ambientes === 3) textoAmbientes = "3 Ambientes";
+
+          const tipoInmueble = alquiler.tipoInmueble || "Directo";
+
           contenedor.innerHTML += `
                     <div class="col-md-4">
                         <div class="card h-100 shadow-sm border-0 overflow-hidden">
                             <img src="${alquiler.imagen}" class="card-img-top" alt="Foto">
                             <div class="card-body">
-                                <span class="badge bg-danger mb-2">Barrio ${alquiler.barrio}</span>
+                                <div class="d-flex gap-1 mb-2">
+                                    <span class="badge bg-danger">Barrio ${alquiler.barrio}</span>
+                                    <span class="badge bg-secondary">${textoAmbientes}</span>
+                                    <span class="badge bg-dark">${tipoInmueble === "Directo" ? "🙋‍♂️ Dueño Directo" : "🏢 Inmobiliaria"}</span>
+                                </div>
                                 <h5 class="card-title fw-bold">${alquiler.titulo}</h5>
                                 <p class="card-text text-success fs-4 fw-bold">$${alquiler.precio.toLocaleString("es-AR")}</p>
                                 <p class="card-text text-muted mb-2">

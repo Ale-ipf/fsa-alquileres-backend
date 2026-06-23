@@ -91,20 +91,22 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-// 🔥 MODIFICADO: Publicar Alquiler ahora acepta un archivo ('foto')
+// MODIFICADO: Publicar Alquiler con nuevos parámetros de ambientes y tipo de inmueble
 app.post('/alquileres', upload.single('foto'), (req, res) => {
     if (!req.session.usuarioLogueado) return res.status(401).send('Error: Debes iniciar sesión.');
     
     const { email, rol } = req.session.usuarioLogueado;
     if (rol !== 'dueno') return res.status(403).send('Error: Solo dueños.');
 
-    const { titulo, precio, barrio, tieneAire } = req.body;
-    if (!titulo || !precio || !barrio) return res.status(400).send('Error: Campos obligatorios.');
+    // 🔥 Extraemos los nuevos campos del formulario
+    const { titulo, precio, barrio, tieneAire, ambientes, tipoInmueble } = req.body;
+    if (!titulo || !precio || !barrio || !ambientes || !tipoInmueble) {
+        return res.status(400).send('Error: Todos los campos son obligatorios.');
+    }
 
-    // 🔥 LÓGICA DE LA FOTO: Si el usuario subió una foto, guardamos su ruta. Si no, una por defecto.
-    let rutaFoto = '/uploads/default-house.jpg'; // Podés buscar cualquier foto de internet para poner por defecto
+    let rutaFoto = '/uploads/default-house.jpg'; 
     if (req.file) {
-        rutaFoto = '/uploads/' + req.file.filename; // Ruta relativa que entenderá el navegador
+        rutaFoto = '/uploads/' + req.file.filename; 
     }
 
     const alquileresExistentes = leerAlquileresDeDisco();
@@ -116,7 +118,9 @@ app.post('/alquileres', upload.single('foto'), (req, res) => {
         precio: Number(precio),
         barrio,
         tieneAire: tieneAire === 'si' ? true : false,
-        imagen: rutaFoto // 🔥 NUEVO CAMPO en la base de datos
+        ambientes: Number(ambientes), // 🔥 Guardamos como número (1, 2 o 3)
+        tipoInmueble,                 // 🔥 Guardamos 'Directo' o 'Inmobiliaria'
+        imagen: rutaFoto 
     };
 
     alquileresExistentes.push(nuevoAlquiler);
