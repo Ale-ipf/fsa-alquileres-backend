@@ -38,66 +38,90 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // 4. BASE DE DATOS EN MEMORIA (Simulada)
-let usuarios = [
-    { email: "dueno@test.com", password: "123", rol: "dueno", favoritos: [] },
-    { email: "estudiante@test.com", password: "123", rol: "inquilino", favoritos: [] }
-];
+const mysql = require('mysql2');
 
-let alquileres = [
-    {
-        id: 1,
-        titulo: "Monoambiente luminoso cerca de la UNaF",
-        precio: 180000,
-        barrio: "UNaF",
-        ambientes: 1,
-        tipoInmueble: "Directo",
-        tieneAire: true,
-        imagen: "/uploads/default-depto.jpg", // Asegurar tener una imagen base o subir una nueva
-        dueno: "dueno@test.com"
-    }
-];
+// Crear el pool de conexiones a la base de datos
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',      // Tu usuario de MySQL (por defecto suele ser root)
+    password: '',      // Tu contraseña de MySQL
+    database: 'fsa_alquileres',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+// Promisificar para poder usar async/await de forma limpia
+const db = pool.promise();
 
 // ==========================================
-// RUTAS DE AUTENTICACIÓN
+// RUTAS DE AUTENTICACIÓN CON MYSQL
 // ==========================================
 
-// Registrar nuevo usuario
-app.post('/registro', (req, res) => {
+// 1. Registrar nuevo usuario en la Base de Datos
+app.post('/registro', async (req, res) => {
     const { email, password, rol } = req.body;
     
     if (!email || !password || !rol) {
         return res.send('<h3>Faltan campos obligatorios. <a href="/registro.html">Volver</a></h3>');
     }
 
-    const existe = usuarios.find(u => u.email === email);
-    if (existe) {
-        return res.send('<h3>El email ya está registrado. <a href="/registro.html">Volver</a></h3>');
-    }
+    try {
+        // Verificar si el email ya existe en la tabla
+        const [existe] = await db.query('SELECT * FROM usuarios WHERE email = ?', [email]);
+        
+        if (existe.length > 0) {
+            return res.send('<h3>El email ya está registrado. <a href="/registro.html">Volver</a></h3>');
+        }
 
-    usuarios.push({ email, password, rol, favoritos: [] });
-    res.redirect('/login.html');
+        // Insertar el nuevo usuario en MySQL
+        await db.query('INSERT INTO usuarios (email, password, rol) VALUES (?, ?, ?)', [email, password, rol]);
+        
+        res.redirect('/login.html');
+    } catch (error) {
+        console.error("Error en el registro:", error);
+        res.status(500).send('<h3>Error interno del servidor al registrar.</h3>');
+    }
 });
 
-// Iniciar sesión
-app.post('/login', (req, res) => {
+// 2. Iniciar sesión consultando la Base de Datos
+app.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    const usuario = usuarios.find(u => u.email === email && u.password === password);
 
-    if (!usuario) {
-        return res.send('<h3>Credenciales incorrectas. <a href="/login.html">Volver</a></h3>');
+    try {
+        // Buscar al usuario por email y contraseña
+        const [usuariosEncontrados] = await db.query(
+            'SELECT * FROM usuarios WHERE email = ? AND password = ?', 
+            [email, password]
+        );
+
+        if (usuariosEncontrados.length === 0) {
+            return res.send('<h3>Credenciales incorrectas. <a href="/login.html">Volver</a></h3>');
+        }
+
+        // El usuario existe, lo guardamos en la sesión
+        const usuario = usuariosEncontrados[0];
+        req.session.usuarioLogueado = {
+            id: usuario.id,
+            email: usuario.email,
+            rol: usuario.rol
+            // Nota: El array de favoritos en memoria desaparece; luego lo manejaremos con una tabla puente si hiciera falta.
+        };
+
+        res.redirect('/');
+    } catch (error) {
+        console.error("Error en el login:", error);
+        res.status(500).send('<h3>Error interno del servidor al iniciar sesión.</h3>');
     }
-
-    req.session.usuarioLogueado = usuario;
-    res.redirect('/');
 });
 
-// Cerrar sesión
+// 3. Cerrar sesión (Se mantiene igual, limpia la cookie)
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/');
 });
 
-// Conocer el estado de la sesión actual (Front-end consulta acá)
+// 4. Conocer el estado de la sesión actual
 app.get('/quien-soy', (req, res) => {
     if (req.session.usuarioLogueado) {
         res.json({
@@ -113,16 +137,36 @@ app.get('/quien-soy', (req, res) => {
 });
 
 // ==========================================
-// RUTAS DE ALQUILERES
+// RUTAS DE ALQUILERES CON MYSQL
 // ==========================================
 
-// Obtener todas las propiedades
-app.get('/alquileres', (req, res) => {
-    res.json(alquileres);
+// 1. Obtener todas las publicaciones
+app.get('/alquileres', async (req, res) => {
+    try {
+        // Hacemos un JOIN para traer el email del dueño
+        const [filas] = await db.query(`
+            SELECT a.id, a.titulo, a.precio, a.barrio, a.ambientes, 
+                   a.tipoInmueble, a.tieneAire, a.imagen, u.email AS dueno 
+            FROM alquileres a
+            JOIN usuarios u ON a.usuario_id = u.id
+            ORDER BY a.id DESC
+        `);
+        
+        // Convertimos el booleano para mantener compatibilidad con el frontend
+        const alquileresFormateados = filas.map(a => ({
+            ...a,
+            tieneAire: Boolean(a.tieneAire)
+        }));
+
+        res.json(alquileresFormateados);
+    } catch (error) {
+        console.error("Error al obtener alquileres:", error);
+        res.status(500).json({ error: "Error al obtener las publicaciones" });
+    }
 });
 
-// Publicar un nuevo alquiler (Solo Dueños)
-app.post('/alquileres', upload.single('foto'), (req, res) => {
+// 2. Publicar un nuevo alquiler (Solo Dueños)
+app.post('/alquileres', upload.single('foto'), async (req, res) => {
     const usuario = req.session.usuarioLogueado;
     
     if (!usuario || usuario.rol !== 'dueno') {
@@ -132,56 +176,75 @@ app.post('/alquileres', upload.single('foto'), (req, res) => {
     const { titulo, precio, barrio, ambientes, tipoInmueble, tieneAire } = req.body;
     const rutaImagen = req.file ? `/uploads/${req.file.filename}` : "/uploads/default-depto.jpg";
 
-    const nuevoAlquiler = {
-        id: Date.now(), // ID dinámico único
-        titulo,
-        precio: Number(precio),
-        barrio,
-        ambientes: Number(ambientes),
-        tipoInmueble: tipoInmueble || "Directo",
-        tieneAire: tieneAire === 'si',
-        imagen: rutaImagen,
-        dueno: usuario.email
-    };
+    try {
+        await db.query(
+            `INSERT INTO alquileres 
+            (titulo, precio, barrio, ambientes, tipoInmueble, tieneAire, imagen, usuario_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                titulo,
+                Number(precio),
+                barrio,
+                Number(ambientes),
+                tipoInmueble || "Directo",
+                tieneAire === 'si' || tieneAire === true ? 1 : 0,
+                rutaImagen,
+                usuario.id
+            ]
+        );
 
-    alquileres.push(nuevoAlquiler);
-    res.redirect('/');
+        res.redirect('/');
+    } catch (error) {
+        console.error("Error al guardar alquiler:", error);
+        res.status(500).send('<h3>Error interno al publicar el alquiler.</h3>');
+    }
 });
 
-// Editar precio de una publicación existente
-app.post('/alquileres/editar-precio', (req, res) => {
+// 3. Editar precio de una publicación existente
+app.post('/alquileres/editar-precio', async (req, res) => {
     const usuario = req.session.usuarioLogueado;
     const { idAlquiler, nuevoPrecio } = req.body;
 
     if (!usuario) return res.status(401).json({ exito: false, mensaje: "No logueado" });
 
-    const depto = alquileres.find(a => a.id === Number(idAlquiler));
-    if (!depto) return res.status(404).json({ exito: false, mensaje: "No se encontró el alquiler" });
+    try {
+        const [filas] = await db.query('SELECT * FROM alquileres WHERE id = ?', [Number(idAlquiler)]);
+        if (filas.length === 0) return res.status(404).json({ exito: false, mensaje: "No se encontró el alquiler" });
 
-    if (depto.dueno !== usuario.email) {
-        return res.status(403).json({ exito: false, mensaje: "No eres el dueño de esta publicación" });
+        const depto = filas[0];
+        if (depto.usuario_id !== usuario.id) {
+            return res.status(403).json({ exito: false, mensaje: "No eres el dueño de esta publicación" });
+        }
+
+        await db.query('UPDATE alquileres SET precio = ? WHERE id = ?', [Number(nuevoPrecio), Number(idAlquiler)]);
+        res.json({ exito: true });
+    } catch (error) {
+        console.error("Error al editar precio:", error);
+        res.status(500).json({ exito: false, mensaje: "Error de servidor" });
     }
-
-    depto.precio = Number(nuevoPrecio);
-    res.json({ exito: true });
 });
 
-// Borrar publicación
-app.post('/alquileres/borrar', (req, res) => {
+// 4. Borrar publicación
+app.post('/alquileres/borrar', async (req, res) => {
     const usuario = req.session.usuarioLogueado;
     const { idAlquiler } = req.body;
 
     if (!usuario) return res.status(401).send("No autorizado");
 
-    const deptoIndex = alquileres.findIndex(a => a.id === Number(idAlquiler));
-    if (deptoIndex === -1) return res.status(404).send("No encontrado");
+    try {
+        const [filas] = await db.query('SELECT * FROM alquileres WHERE id = ?', [Number(idAlquiler)]);
+        if (filas.length === 0) return res.status(404).send("No encontrado");
 
-    if (alquileres[deptoIndex].dueno !== usuario.email) {
-        return res.status(403).send("No tienes permiso");
+        if (filas[0].usuario_id !== usuario.id) {
+            return res.status(403).send("No tienes permiso");
+        }
+
+        await db.query('DELETE FROM alquileres WHERE id = ?', [Number(idAlquiler)]);
+        res.redirect('/');
+    } catch (error) {
+        console.error("Error al borrar alquiler:", error);
+        res.status(500).send("Error interno al eliminar");
     }
-
-    alquileres.splice(deptoIndex, 1);
-    res.redirect('/');
 });
 
 // ==========================================

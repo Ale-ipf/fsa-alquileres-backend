@@ -1,418 +1,598 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Alquileres Formosa 🏠</title>
     <!-- Bootstrap 5 CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <style>
-        /* PALETTE: Atardecer Litoraleño (Cálida y Confortable) */
-        :root {
-            --color-terracota: #9a3412;  
-            --color-atardecer: #ea580c;   
-            --color-crema-fondo: #fdfbf7; 
-            --color-verde-mate: #16a34a;  
-            --color-borde-calido: #f1f5f9;
-        }
+      /* PALETTE: Atardecer Litoraleño (Cálida y Confortable) */
+      :root {
+        --color-terracota: #9a3412;
+        --color-atardecer: #ea580c;
+        --color-crema-fondo: #fdfbf7;
+        --color-verde-mate: #16a34a;
+        --color-borde-calido: #f1f5f9;
+      }
 
-        body {
-            background-color: var(--color-crema-fondo) !important;
-            color: #292524;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+      body {
+        background-color: var(--color-crema-fondo) !important;
+        color: #292524;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
 
-        .brand-title {
-            color: var(--color-terracota);
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-        
-        .btn-primario {
-            background-color: var(--color-terracota);
-            color: white;
-            border: none;
-            transition: all 0.2s ease;
-        }
-        .btn-primario:hover {
-            background-color: #7c2d12;
-            color: white;
-            transform: translateY(-1px);
-        }
+      .brand-title {
+        color: var(--color-terracota);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
 
-        .btn-acento {
-            background-color: transparent;
-            color: var(--color-atardecer);
-            border: 2px solid var(--color-atardecer);
-            transition: all 0.2s ease;
-        }
-        .btn-acento:hover {
-            background-color: var(--color-atardecer);
-            color: white;
-            transform: translateY(-1px);
-        }
+      .btn-primario {
+        background-color: var(--color-terracota);
+        color: white;
+        border: none;
+        transition: all 0.2s ease;
+      }
+      .btn-primario:hover {
+        background-color: #7c2d12;
+        color: white;
+        transform: translateY(-1px);
+      }
 
-        .card-alquiler {
-            border: 1px solid #f5f5f4 !important;
-            border-radius: 12px !important;
-            background-color: #ffffff;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative; /* Necesario para ubicar la estrella arriba */
-        }
-        .card-alquiler:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(154, 52, 18, 0.06) !important;
-        }
-        .card-img-top {
-            height: 210px;
-            object-fit: cover;
-        }
+      .btn-acento {
+        background-color: transparent;
+        color: var(--color-atardecer);
+        border: 2px solid var(--color-atardecer);
+        transition: all 0.2s ease;
+      }
+      .btn-acento:hover {
+        background-color: var(--color-atardecer);
+        color: white;
+        transform: translateY(-1px);
+      }
 
-        .panel-premium {
-            border-radius: 12px !important;
-            border: none !important;
-            box-shadow: 0 4px 6px -1px rgba(124, 45, 18, 0.03);
-            background-color: #ffffff;
-        }
-        .border-top-terracota {
-            border-top: 4px solid var(--color-terracota) !important;
-        }
+      .card-alquiler {
+        border: 1px solid #f5f5f4 !important;
+        border-radius: 12px !important;
+        background-color: #ffffff;
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+        position: relative; /* Necesario para ubicar la estrella arriba */
+      }
+      .card-alquiler:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(154, 52, 18, 0.06) !important;
+      }
+      .card-img-top {
+        height: 210px;
+        object-fit: cover;
+      }
 
-        .bg-badge-barrio { background-color: #0284c7; }
-        .bg-badge-ambientes { background-color: #78716c; }
-        .bg-badge-tipo { background-color: var(--color-terracota); }
-        
-        .text-precio { color: var(--color-verde-mate) !important; }
+      .panel-premium {
+        border-radius: 12px !important;
+        border: none !important;
+        box-shadow: 0 4px 6px -1px rgba(124, 45, 18, 0.03);
+        background-color: #ffffff;
+      }
+      .border-top-terracota {
+        border-top: 4px solid var(--color-terracota) !important;
+      }
 
-        .alert-info-custom {
-            background-color: #ffedd5;
-            color: #9a3412;
-            border: 1px solid #fed7aa;
-            border-radius: 8px;
-        }
+      .bg-badge-barrio {
+        background-color: #0284c7;
+      }
+      .bg-badge-ambientes {
+        background-color: #78716c;
+      }
+      .bg-badge-tipo {
+        background-color: var(--color-terracota);
+      }
 
-        /* Botón de favoritos flotante aesthetic */
-        .btn-favorito-flotante {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            border-radius: 50%;
-            width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 8px rgba(154, 52, 18, 0.1);
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: transform 0.2s ease, background-color 0.2s ease;
-            z-index: 10;
-        }
-        .btn-favorito-flotante:hover {
-            transform: scale(1.1);
-            background: #ffffff;
-        }
+      .text-precio {
+        color: var(--color-verde-mate) !important;
+      }
+
+      .alert-info-custom {
+        background-color: #ffedd5;
+        color: #9a3412;
+        border: 1px solid #fed7aa;
+        border-radius: 8px;
+      }
+
+      /* Botón de favoritos flotante aesthetic */
+      .btn-favorito-flotante {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(154, 52, 18, 0.1);
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition:
+          transform 0.2s ease,
+          background-color 0.2s ease;
+        z-index: 10;
+      }
+      .btn-favorito-flotante:hover {
+        transform: scale(1.1);
+        background: #ffffff;
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div class="container py-5">
-        <!-- ENCABEZADO PRINCIPAL -->
-        <div class="d-flex justify-content-between align-items-center mb-5">
-            <h1 class="brand-title m-0">Alquileres Formosa 🏠</h1>
-            <div class="d-flex justify-content-center gap-3">
-        <a href="/institucional.html" style="color: var(--color-terracota); text-decoration: none; font-weight: 600;">Institucional</a>
-        <span class="text-muted">|</span>
-        <a href="/contacto.html" style="color: var(--color-terracota); text-decoration: none; font-weight: 600;">Contacto</a>
-    </div>
-            <div id="botones-invitado">
-                <a href="/login.html" class="btn btn-primario fw-bold px-4 py-2 me-2">Iniciar Sesión 🚀</a>
-                <a href="/registro.html" class="btn btn-acento fw-bold px-4 py-2">Crear Cuenta</a>
+      <!-- ENCABEZADO PRINCIPAL -->
+      <div class="d-flex justify-content-between align-items-center mb-5">
+        <h1 class="brand-title m-0">Alquileres Formosa 🏠</h1>
+        <div class="d-flex justify-content-center gap-3">
+          <a
+            href="/institucional.html"
+            style="
+              color: var(--color-terracota);
+              text-decoration: none;
+              font-weight: 600;
+            "
+            >Institucional</a
+          >
+          <span class="text-muted">|</span>
+          <a
+            href="/contacto.html"
+            style="
+              color: var(--color-terracota);
+              text-decoration: none;
+              font-weight: 600;
+            "
+            >Contacto</a
+          >
+        </div>
+        <div id="botones-invitado">
+          <a href="/login.html" class="btn btn-primario fw-bold px-4 py-2 me-2"
+            >Iniciar Sesión</a
+          >
+          <a href="/registro.html" class="btn btn-acento fw-bold px-4 py-2"
+            >Crear Cuenta</a
+          >
+        </div>
+      </div>
+
+      <!-- BARRA DE BIENVENIDA -->
+      <div
+        id="barra-usuario"
+        class="alert alert-info-custom d-none justify-content-between align-items-center p-3 shadow-sm mb-4"
+      >
+        <span id="texto-bienvenida" class="fw-bold fs-5"></span>
+        <a href="/logout" class="btn btn-outline-danger btn-sm fw-bold px-3"
+          >Cerrar Sesión ❌</a
+        >
+      </div>
+
+      <!-- SECCIÓN DE PUBLICACIÓN -->
+      <div class="row mb-5 d-none" id="seccion-publicar">
+        <div class="col-12">
+          <div class="card panel-premium border-top-terracota p-4">
+            <h3
+              class="mb-4 fw-bold"
+              style="color: var(--color-terracota) !important"
+            >
+              Publicar un Nuevo Alquiler
+            </h3>
+            <form
+              action="/alquileres"
+              method="POST"
+              enctype="multipart/form-data"
+            >
+              <p class="text-muted small">
+                Publicando como: <strong id="email-sesion-publicar"></strong>
+              </p>
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold"
+                    >Título del Anuncio</label
+                  >
+                  <input
+                    type="text"
+                    name="titulo"
+                    class="form-control"
+                    placeholder="Ej: Monoambiente a estrenar"
+                    required
+                  />
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label fw-semibold">Precio ($)</label>
+                  <input
+                    type="number"
+                    name="precio"
+                    class="form-control"
+                    required
+                  />
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label fw-semibold">Barrio</label>
+                  <select name="barrio" class="form-select">
+                    <option value="Centro">Centro</option>
+                    <option value="San Miguel">San Miguel</option>
+                    <option value="Guadalupe">Guadalupe</option>
+                    <option value="UNaF">Cerca de la UNaF</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label fw-semibold">Ambientes</label>
+                  <select name="ambientes" class="form-select" required>
+                    <option value="1">Monoambiente</option>
+                    <option value="2">2 Ambientes</option>
+                    <option value="3">3 Ambientes</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label fw-semibold">Tipo</label>
+                  <select name="tipoInmueble" class="form-select" required>
+                    <option value="Directo">Dueño Directo</option>
+                    <option value="Inmobiliaria">Inmobiliaria</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label fw-semibold"
+                    >Foto del Inmueble 📸</label
+                  >
+                  <input
+                    type="file"
+                    name="foto"
+                    class="form-control"
+                    accept="image/*"
+                    required
+                  />
+                </div>
+              </div>
+              <div
+                class="d-flex justify-content-between align-items-center mt-4"
+              >
+                <div class="form-check">
+                  <input
+                    type="checkbox"
+                    name="tieneAire"
+                    value="si"
+                    class="form-check-input"
+                    id="aire"
+                  />
+                  <label class="form-check-label fw-semibold" for="aire"
+                    >¿Tiene Aire Acondicionado? ❄️</label
+                  >
+                </div>
+                <button
+                  type="submit"
+                  class="btn btn-primario px-5 py-2 fw-bold"
+                >
+                  Publicar Propiedad
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL DE FILTROS AVANZADOS -->
+      <div class="card panel-premium p-4 mb-5 shadow-sm" id="panel-filtros">
+        <h4 class="fw-bold mb-3" style="color: var(--color-terracota)">
+          🔎 Filtros de Búsqueda Avanzada
+        </h4>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold text-muted"
+              >Barrio</label
+            >
+            <select
+              id="filtro-barrio"
+              class="form-select"
+              onchange="aplicarFiltros()"
+            >
+              <option value="Todos">🏡 Todos los barrios</option>
+              <option value="Centro">Centro</option>
+              <option value="San Miguel">San Miguel</option>
+              <option value="Guadalupe">Guadalupe</option>
+              <option value="UNaF">Cerca de la UNaF</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold text-muted"
+              >Cantidad de Ambientes</label
+            >
+            <select
+              id="filtro-ambientes"
+              class="form-select"
+              onchange="aplicarFiltros()"
+            >
+              <option value="Todos">🚪 Cualquier cantidad</option>
+              <option value="1">Monoambiente</option>
+              <option value="2">2 Ambientes</option>
+              <option value="3">3 Ambientes</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold text-muted"
+              >Publicado por</label
+            >
+            <select
+              id="filtro-tipo"
+              class="form-select"
+              onchange="aplicarFiltros()"
+            >
+              <option value="Todos">🤝 Todos (Directo/Inmobiliaria)</option>
+              <option value="Directo">Dueño Directo</option>
+              <option value="Inmobiliaria">Inmobiliaria</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small fw-semibold text-muted"
+              >Ordenar por Precio</label
+            >
+            <select
+              id="orden-precio"
+              class="form-select"
+              onchange="aplicarFiltros()"
+            >
+              <option value="Defecto">Sin ordenar</option>
+              <option value="MenorMayor">💰 Menor a Mayor</option>
+              <option value="MayorMenor">💎 Mayor a Menor</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold text-muted"
+              >Precio Máximo ($)</label
+            >
+            <input
+              type="number"
+              id="filtro-precio"
+              class="form-control"
+              placeholder="Ej: 250000"
+              oninput="aplicarFiltros()"
+            />
+          </div>
+          <div
+            class="col-md-6 d-flex align-items-center justify-content-between pt-4"
+          >
+            <div class="form-check">
+              <input
+                type="checkbox"
+                id="filtro-aire"
+                class="form-check-input"
+                onchange="aplicarFiltros()"
+              />
+              <label
+                class="form-check-label fw-semibold text-muted"
+                for="filtro-aire"
+              >
+                Solo con Aire Acondicionado ❄️
+              </label>
             </div>
-        </div>
 
-        <!-- BARRA DE BIENVENIDA -->
-        <div id="barra-usuario" class="alert alert-info-custom d-none justify-content-between align-items-center p-3 shadow-sm mb-4">
-            <span id="texto-bienvenida" class="fw-bold fs-5"></span>
-            <a href="/logout" class="btn btn-outline-danger btn-sm fw-bold px-3">Cerrar Sesión ❌</a>
-        </div>
-
-        <!-- SECCIÓN DE PUBLICACIÓN -->
-        <div class="row mb-5 d-none" id="seccion-publicar">
-            <div class="col-12">
-                <div class="card panel-premium border-top-terracota p-4">
-                    <h3 class="mb-4 fw-bold" style="color: var(--color-terracota) !important;">Publicar un Nuevo Alquiler</h3>
-                    <form action="/alquileres" method="POST" enctype="multipart/form-data">
-                        <p class="text-muted small">Publicando como: <strong id="email-sesion-publicar"></strong></p>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Título del Anuncio</label>
-                                <input type="text" name="titulo" class="form-control" placeholder="Ej: Monoambiente a estrenar" required>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label fw-semibold">Precio ($)</label>
-                                <input type="number" name="precio" class="form-control" required>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label fw-semibold">Barrio</label>
-                                <select name="barrio" class="form-select">
-                                    <option value="Centro">Centro</option>
-                                    <option value="San Miguel">San Miguel</option>
-                                    <option value="Guadalupe">Guadalupe</option>
-                                    <option value="UNaF">Cerca de la UNaF</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label fw-semibold">Ambientes</label>
-                                <select name="ambientes" class="form-select" required>
-                                    <option value="1">Monoambiente</option>
-                                    <option value="2">2 Ambientes</option>
-                                    <option value="3">3 Ambientes</option>
-                                </select>
-                            </div>
-                            <div class="col-md-2">
-                                <label class="form-label fw-semibold">Tipo</label>
-                                <select name="tipoInmueble" class="form-select" required>
-                                    <option value="Directo">Dueño Directo</option>
-                                    <option value="Inmobiliaria">Inmobiliaria</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Foto del Inmueble 📸</label>
-                                <input type="file" name="foto" class="form-control" accept="image/*" required>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-4">
-                            <div class="form-check">
-                                <input type="checkbox" name="tieneAire" value="si" class="form-check-input" id="aire">
-                                <label class="form-check-label fw-semibold" for="aire">¿Tiene Aire Acondicionado? ❄️</label>
-                            </div>
-                            <button type="submit" class="btn btn-primario px-5 py-2 fw-bold">Publicar Propiedad</button>
-                        </div>
-                    </form>
-                </div>
+            <!-- 🌟 NUEVO: Checkbox rápido para filtrar favoritos -->
+            <div class="form-check d-none" id="contenedor-filtro-favoritos">
+              <input
+                type="checkbox"
+                id="filtro-favoritos"
+                class="form-check-input"
+                onchange="aplicarFiltros()"
+              />
+              <label
+                class="form-check-label fw-bold"
+                style="color: var(--color-atardecer)"
+                for="filtro-favoritos"
+              >
+                ⭐ Ver mis Favoritos
+              </label>
             </div>
+          </div>
         </div>
+      </div>
 
-        <!-- PANEL DE FILTROS AVANZADOS -->
-        <div class="card panel-premium p-4 mb-5 shadow-sm" id="panel-filtros">
-            <h4 class="fw-bold mb-3" style="color: var(--color-terracota);">🔎 Filtros de Búsqueda Avanzada</h4>
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold text-muted">Barrio</label>
-                    <select id="filtro-barrio" class="form-select" onchange="aplicarFiltros()">
-                        <option value="Todos">🏡 Todos los barrios</option>
-                        <option value="Centro">Centro</option>
-                        <option value="San Miguel">San Miguel</option>
-                        <option value="Guadalupe">Guadalupe</option>
-                        <option value="UNaF">Cerca de la UNaF</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold text-muted">Cantidad de Ambientes</label>
-                    <select id="filtro-ambientes" class="form-select" onchange="aplicarFiltros()">
-                        <option value="Todos">🚪 Cualquier cantidad</option>
-                        <option value="1">Monoambiente</option>
-                        <option value="2">2 Ambientes</option>
-                        <option value="3">3 Ambientes</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold text-muted">Publicado por</label>
-                    <select id="filtro-tipo" class="form-select" onchange="aplicarFiltros()">
-                        <option value="Todos">🤝 Todos (Directo/Inmobiliaria)</option>
-                        <option value="Directo">Dueño Directo</option>
-                        <option value="Inmobiliaria">Inmobiliaria</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-semibold text-muted">Ordenar por Precio</label>
-                    <select id="orden-precio" class="form-select" onchange="aplicarFiltros()">
-                        <option value="Defecto">Sin ordenar</option>
-                        <option value="MenorMayor">💰 Menor a Mayor</option>
-                        <option value="MayorMenor">💎 Mayor a Menor</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label small fw-semibold text-muted">Precio Máximo ($)</label>
-                    <input type="number" id="filtro-precio" class="form-control" placeholder="Ej: 250000" oninput="aplicarFiltros()">
-                </div>
-                <div class="col-md-6 d-flex align-items-center justify-content-between pt-4">
-                    <div class="form-check">
-                        <input type="checkbox" id="filtro-aire" class="form-check-input" onchange="aplicarFiltros()">
-                        <label class="form-check-label fw-semibold text-muted" for="filtro-aire">
-                            Solo con Aire Acondicionado ❄️
-                        </label>
-                    </div>
-
-                    <!-- 🌟 NUEVO: Checkbox rápido para filtrar favoritos -->
-                    <div class="form-check d-none" id="contenedor-filtro-favoritos">
-                        <input type="checkbox" id="filtro-favoritos" class="form-check-input" onchange="aplicarFiltros()">
-                        <label class="form-check-label fw-bold" style="color: var(--color-atardecer)" for="filtro-favoritos">
-                            ⭐ Ver mis Favoritos
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SECCIÓN: ALQUILERES DISPONIBLES -->
-        <h2 class="mb-4 fw-bold" style="color: var(--color-terracota);">Alquileres Disponibles en Formosa</h2>
-        <div id="contenedor-alquileres" class="row g-4">
-            <p class="text-muted">Cargando alquileres de la base de datos...</p>
-        </div>
+      <!-- SECCIÓN: ALQUILERES DISPONIBLES -->
+      <h2 class="mb-4 fw-bold" style="color: var(--color-terracota)">
+        Alquileres Disponibles en Formosa
+      </h2>
+      <div id="contenedor-alquileres" class="row g-4">
+        <p class="text-muted">Cargando alquileres de la base de datos...</p>
+      </div>
     </div>
 
     <footer class="text-center py-4 mt-5 border-top">
-    <p class="text-muted small">© 2026 Alquileres Formosa</p>
-    <div class="d-flex justify-content-center gap-3">
-        <a href="/institucional.html" style="color: var(--color-terracota); text-decoration: none; font-weight: 600;">🏫 Institucional</a>
+      <p class="text-muted small">© 2026 Alquileres Formosa</p>
+      <div class="d-flex justify-content-center gap-3">
+        <a
+          href="/institucional.html"
+          style="
+            color: var(--color-terracota);
+            text-decoration: none;
+            font-weight: 600;
+          "
+          >🏫 Institucional</a
+        >
         <span class="text-muted">|</span>
-        <a href="/contacto.html" style="color: var(--color-terracota); text-decoration: none; font-weight: 600;">✉️ Contacto y Ubicación</a>
-    </div>
-</footer>
+        <a
+          href="/contacto.html"
+          style="
+            color: var(--color-terracota);
+            text-decoration: none;
+            font-weight: 600;
+          "
+          >✉️ Contacto y Ubicación</a
+        >
+      </div>
+    </footer>
 
     <script>
-        let todosLosAlquileres = [];
-        let usuarioActual = null; 
-        let misFavoritosIds = []; // 🌟 Guardaremos los IDs de los favoritos del usuario actual
+      let todosLosAlquileres = [];
+      let usuarioActual = null;
+      let misFavoritosIds = []; // 🌟 Guardaremos los IDs de los favoritos del usuario actual
 
-        async function verificarSesion() {
-            try {
-                const res = await fetch('/quien-soy');
-                const info = await res.json();
+      async function verificarSesion() {
+        try {
+          const res = await fetch("/quien-soy");
+          const info = await res.json();
 
-                const barraUsuario = document.getElementById('barra-usuario');
-                const textoBienvenida = document.getElementById('texto-bienvenida');
-                const botonesInvitado = document.getElementById('botones-invitado');
-                const seccionPublicar = document.getElementById('seccion-publicar');
-                const emailSesionPublicar = document.getElementById('email-sesion-publicar');
-                const panelFiltros = document.getElementById('panel-filtros');
-                const contenedorFiltroFavoritos = document.getElementById('contenedor-filtro-favoritos');
+          const barraUsuario = document.getElementById("barra-usuario");
+          const textoBienvenida = document.getElementById("texto-bienvenida");
+          const botonesInvitado = document.getElementById("botones-invitado");
+          const seccionPublicar = document.getElementById("seccion-publicar");
+          const emailSesionPublicar = document.getElementById(
+            "email-sesion-publicar",
+          );
+          const panelFiltros = document.getElementById("panel-filtros");
+          const contenedorFiltroFavoritos = document.getElementById(
+            "contenedor-filtro-favoritos",
+          );
 
-                if (info.logueado) {
-                    usuarioActual = info.usuario; 
-                    botonesInvitado.classList.add('d-none');
-                    barraUsuario.classList.remove('d-none');
-                    barraUsuario.classList.add('d-flex');
-                    textoBienvenida.innerText = `¡Hola, ${info.usuario.email} (${info.usuario.rol.toUpperCase()})! 👋`;
+          if (info.logueado) {
+            usuarioActual = info.usuario;
+            botonesInvitado.classList.add("d-none");
+            barraUsuario.classList.remove("d-none");
+            barraUsuario.classList.add("d-flex");
+            textoBienvenida.innerText = `¡Hola, ${info.usuario.email} (${info.usuario.rol.toUpperCase()})! 👋`;
 
-                    if (info.usuario.rol === 'dueno') {
-                        seccionPublicar.classList.remove('d-none');
-                        emailSesionPublicar.innerText = info.usuario.email;
-                        panelFiltros.classList.add('d-none'); 
-                        contenedorFiltroFavoritos.classList.add('d-none');
-                    } else {
-                        seccionPublicar.classList.add('d-none');
-                        panelFiltros.classList.remove('d-none');
-                        contenedorFiltroFavoritos.classList.remove('d-none'); // Mostrar filtro de favoritos a estudiantes
-                        await obtenerFavoritos(); // Cargamos sus guardados
-                    }
-                } else {
-                    usuarioActual = null; 
-                    botonesInvitado.classList.remove('d-none');
-                    barraUsuario.classList.add('d-none');
-                    seccionPublicar.classList.add('d-none');
-                    panelFiltros.classList.remove('d-none'); 
-                    contenedorFiltroFavoritos.classList.add('d-none');
-                    misFavoritosIds = [];
-                }
-            } catch (e) {
-                console.error("Error verificando sesión", e);
+            if (info.usuario.rol === "dueno") {
+              seccionPublicar.classList.remove("d-none");
+              emailSesionPublicar.innerText = info.usuario.email;
+              panelFiltros.classList.add("d-none");
+              contenedorFiltroFavoritos.classList.add("d-none");
+            } else {
+              seccionPublicar.classList.add("d-none");
+              panelFiltros.classList.remove("d-none");
+              contenedorFiltroFavoritos.classList.remove("d-none"); // Mostrar filtro de favoritos a estudiantes
+              await obtenerFavoritos(); // Cargamos sus guardados
             }
-            obtenerAlquileres();
+          } else {
+            usuarioActual = null;
+            botonesInvitado.classList.remove("d-none");
+            barraUsuario.classList.add("d-none");
+            seccionPublicar.classList.add("d-none");
+            panelFiltros.classList.remove("d-none");
+            contenedorFiltroFavoritos.classList.add("d-none");
+            misFavoritosIds = [];
+          }
+        } catch (e) {
+          console.error("Error verificando sesión", e);
+        }
+        obtenerAlquileres();
+      }
+
+      // 🌟 Cargar favoritos desde el servidor
+      async function obtenerFavoritos() {
+        try {
+          const res = await fetch("/usuarios/favoritos");
+          misFavoritosIds = await res.json();
+        } catch (e) {
+          console.error("Error cargando favoritos", e);
+        }
+      }
+
+      // 🌟 Agregar o quitar de favoritos dinámicamente
+      async function alternarFavorito(idAlquiler) {
+        try {
+          const res = await fetch("/usuarios/favoritos/toggle", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `idAlquiler=${idAlquiler}`,
+          });
+          const data = await res.json();
+          if (data.exito) {
+            misFavoritosIds = data.favoritos;
+            aplicarFiltros(); // Refrescamos las tarjetas para pintar o despintar la estrella
+          }
+        } catch (e) {
+          console.error("Error al guardar favorito", e);
+        }
+      }
+
+      async function obtenerAlquileres() {
+        try {
+          const respuesta = await fetch("/alquileres");
+          todosLosAlquileres = await respuesta.json();
+          dibujarTarjetas(todosLosAlquileres);
+        } catch (error) {
+          console.error("Error al cargar alquileres:", error);
+        }
+      }
+
+      function aplicarFiltros() {
+        const barrioSeleccionado =
+          document.getElementById("filtro-barrio").value;
+        const ambientesSeleccionados =
+          document.getElementById("filtro-ambientes").value;
+        const tipoSeleccionado = document.getElementById("filtro-tipo").value;
+        const precioMaximo = document.getElementById("filtro-precio").value;
+        const soloConAire = document.getElementById("filtro-aire").checked;
+        const ordenPrecio = document.getElementById("orden-precio").value;
+
+        // Checkbox de favoritos
+        const switchFavoritos = document.getElementById("filtro-favoritos")
+          ? document.getElementById("filtro-favoritos").checked
+          : false;
+
+        let alquileresFiltrados = todosLosAlquileres.filter((alquiler) => {
+          const cumpleBarrio =
+            barrioSeleccionado === "Todos" ||
+            alquiler.barrio === barrioSeleccionado;
+          const deptoAmbientes = alquiler.ambientes || 1;
+          const cumpleAmbientes =
+            ambientesSeleccionados === "Todos" ||
+            deptoAmbientes === Number(ambientesSeleccionados);
+
+          const deptoTipo = alquiler.tipoInmueble || "Directo";
+          const cumpleTipo =
+            tipoSeleccionado === "Todos" || deptoTipo === tipoSeleccionado;
+
+          const cumplePrecio =
+            !precioMaximo || alquiler.precio <= Number(precioMaximo);
+          const cumpleAire = !soloConAire || alquiler.tieneAire === true;
+
+          // 🌟 Filtro de favoritos: si está activo, solo pasan los IDs guardados
+          const cumpleFavorito =
+            !switchFavoritos || misFavoritosIds.includes(alquiler.id);
+
+          return (
+            cumpleBarrio &&
+            cumpleAmbientes &&
+            cumpleTipo &&
+            cumplePrecio &&
+            cumpleAire &&
+            cumpleFavorito
+          );
+        });
+
+        if (ordenPrecio === "MenorMayor") {
+          alquileresFiltrados.sort((a, b) => a.precio - b.precio);
+        } else if (ordenPrecio === "MayorMenor") {
+          alquileresFiltrados.sort((a, b) => b.precio - a.precio);
         }
 
-        // 🌟 Cargar favoritos desde el servidor
-        async function obtenerFavoritos() {
-            try {
-                const res = await fetch('/usuarios/favoritos');
-                misFavoritosIds = await res.json();
-            } catch (e) {
-                console.error("Error cargando favoritos", e);
-            }
+        dibujarTarjetas(alquileresFiltrados);
+      }
+
+      function dibujarTarjetas(lista) {
+        const contenedor = document.getElementById("contenedor-alquileres");
+        contenedor.innerHTML = "";
+
+        if (lista.length === 0) {
+          contenedor.innerHTML =
+            '<div class="col-12"><p class="alert alert-warning text-center shadow-sm">No encontramos alquileres con esos filtros, Rey. 🔍</p></div>';
+          return;
         }
 
-        // 🌟 Agregar o quitar de favoritos dinámicamente
-        async function alternarFavorito(idAlquiler) {
-            try {
-                const res = await fetch('/usuarios/favoritos/toggle', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `idAlquiler=${idAlquiler}`
-                });
-                const data = await res.json();
-                if (data.exito) {
-                    misFavoritosIds = data.favoritos;
-                    aplicarFiltros(); // Refrescamos las tarjetas para pintar o despintar la estrella
-                }
-            } catch (e) {
-                console.error("Error al guardar favorito", e);
-            }
-        }
-
-        async function obtenerAlquileres() {
-            try {
-                const respuesta = await fetch('/alquileres');
-                todosLosAlquileres = await respuesta.json();
-                dibujarTarjetas(todosLosAlquileres);
-            } catch (error) {
-                console.error("Error al cargar alquileres:", error);
-            }
-        }
-
-        function aplicarFiltros() {
-            const barrioSeleccionado = document.getElementById('filtro-barrio').value;
-            const ambientesSeleccionados = document.getElementById('filtro-ambientes').value;
-            const tipoSeleccionado = document.getElementById('filtro-tipo').value;
-            const precioMaximo = document.getElementById('filtro-precio').value;
-            const soloConAire = document.getElementById('filtro-aire').checked;
-            const ordenPrecio = document.getElementById('orden-precio').value;
-            
-            // Checkbox de favoritos
-            const switchFavoritos = document.getElementById('filtro-favoritos') ? document.getElementById('filtro-favoritos').checked : false;
-
-            let alquileresFiltrados = todosLosAlquileres.filter(alquiler => {
-                const cumpleBarrio = (barrioSeleccionado === 'Todos' || alquiler.barrio === barrioSeleccionado);
-                const deptoAmbientes = alquiler.ambientes || 1;
-                const cumpleAmbientes = (ambientesSeleccionados === 'Todos' || deptoAmbientes === Number(ambientesSeleccionados));
-                
-                const deptoTipo = alquiler.tipoInmueble || 'Directo';
-                const cumpleTipo = (tipoSeleccionado === 'Todos' || deptoTipo === tipoSeleccionado);
-                
-                const cumplePrecio = (!precioMaximo || alquiler.precio <= Number(precioMaximo));
-                const cumpleAire = (!soloConAire || alquiler.tieneAire === true);
-                
-                // 🌟 Filtro de favoritos: si está activo, solo pasan los IDs guardados
-                const cumpleFavorito = (!switchFavoritos || misFavoritosIds.includes(alquiler.id));
-
-                return cumpleBarrio && cumpleAmbientes && cumpleTipo && cumplePrecio && cumpleAire && cumpleFavorito;
-            });
-
-            if (ordenPrecio === 'MenorMayor') {
-                alquileresFiltrados.sort((a, b) => a.precio - b.precio);
-            } else if (ordenPrecio === 'MayorMenor') {
-                alquileresFiltrados.sort((a, b) => b.precio - a.precio);
-            }
-
-            dibujarTarjetas(alquileresFiltrados);
-        }
-
-        function dibujarTarjetas(lista) {
-    const contenedor = document.getElementById('contenedor-alquileres');
-    contenedor.innerHTML = '';
-
-    if (lista.length === 0) {
-        contenedor.innerHTML = '<div class="col-12"><p class="alert alert-warning text-center shadow-sm">No encontramos alquileres con esos filtros, Rey. 🔍</p></div>';
-        return;
-    }
-
-    lista.forEach(alquiler => {
-        let accionesDuenoHtml = '';
-        // Usamos alquiler.id asegurando que coincida con el backend
-        if (usuarioActual && usuarioActual.email === alquiler.dueno) {
+        lista.forEach((alquiler) => {
+          let accionesDuenoHtml = "";
+          // Usamos alquiler.id asegurando que coincida con el backend
+          if (usuarioActual && usuarioActual.email === alquiler.dueno) {
             accionesDuenoHtml = `
                 <div class="mt-3 d-flex gap-2">
                     <button onclick="modificarPrecio(${alquiler.id}, ${alquiler.precio})" class="btn btn-sm btn-outline-warning w-50 fw-bold text-dark">Editar Precio ✏️</button>
@@ -422,26 +602,26 @@
                     </form>
                 </div>
             `;
-        }
+          }
 
-        // 🌟 CORRECCIÓN AQUÍ: Validamos con alquiler.id (sin guion bajo)
-        let botonFavoritoHtml = '';
-        if (usuarioActual && usuarioActual.rol === 'inquilino') {
+          // 🌟 CORRECCIÓN AQUÍ: Validamos con alquiler.id (sin guion bajo)
+          let botonFavoritoHtml = "";
+          if (usuarioActual && usuarioActual.rol === "inquilino") {
             const esFavorito = misFavoritosIds.includes(Number(alquiler.id));
             botonFavoritoHtml = `
-                <button class="btn-favorito-flotante" onclick="alternarFavorito(${alquiler.id})" title="${esFavorito ? 'Quitar de favoritos' : 'Guardar en favoritos'}">
-                    ${esFavorito ? '⭐' : '☆'}
+                <button class="btn-favorito-flotante" onclick="alternarFavorito(${alquiler.id})" title="${esFavorito ? "Quitar de favoritos" : "Guardar en favoritos"}">
+                    ${esFavorito ? "⭐" : "☆"}
                 </button>
             `;
-        }
+          }
 
-        let textoAmbientes = 'Monoambiente';
-        if (alquiler.ambientes === 2) textoAmbientes = '2 Ambientes';
-        if (alquiler.ambientes === 3) textoAmbientes = '3 Ambientes';
+          let textoAmbientes = "Monoambiente";
+          if (alquiler.ambientes === 2) textoAmbientes = "2 Ambientes";
+          if (alquiler.ambientes === 3) textoAmbientes = "3 Ambientes";
 
-        const tipoInmueble = alquiler.tipoInmueble || 'Directo';
+          const tipoInmueble = alquiler.tipoInmueble || "Directo";
 
-        contenedor.innerHTML += `
+          contenedor.innerHTML += `
             <div class="col-md-4">
                 <div class="card h-100 card-alquiler shadow-sm overflow-hidden">
                     ${botonFavoritoHtml}
@@ -450,12 +630,12 @@
                         <div class="d-flex flex-wrap gap-1 mb-3">
                             <span class="badge bg-badge-barrio px-2 py-1 small">Barrio ${alquiler.barrio}</span>
                             <span class="badge bg-badge-ambientes px-2 py-1 small">${textoAmbientes}</span>
-                            <span class="badge bg-badge-tipo px-2 py-1 small">${tipoInmueble === 'Directo' ? '🙋‍♂️ Dueño Directo' : '🏢 Inmobiliaria'}</span>
+                            <span class="badge bg-badge-tipo px-2 py-1 small">${tipoInmueble === "Directo" ? "🙋‍♂️ Dueño Directo" : "🏢 Inmobiliaria"}</span>
                         </div>
                         <h5 class="card-title fw-bold text-dark mb-2">${alquiler.titulo}</h5>
-                        <p class="card-text text-precio fs-3 fw-bold mb-2">$${alquiler.precio.toLocaleString('es-AR')}</p>
+                        <p class="card-text text-precio fs-3 fw-bold mb-2">$${alquiler.precio.toLocaleString("es-AR")}</p>
                         <p class="card-text text-stone-500 small mb-0">
-                            ${alquiler.tieneAire ? '❄️ Con Aire Acondicionado' : '💨 Ventilador de techo'}
+                            ${alquiler.tieneAire ? "❄️ Con Aire Acondicionado" : "💨 Ventilador de techo"}
                         </p>
                         ${accionesDuenoHtml} 
                     </div>
@@ -465,26 +645,26 @@
                 </div>
             </div>
         `;
-    });
-}
+        });
+      }
 
-        async function modificarPrecio(id, precioActual) {
-            const nuevoPrecio = prompt(`Nuevo precio:`, precioActual);
-            if (nuevoPrecio === null || nuevoPrecio.trim() === '') return;
-            try {
-                const respuesta = await fetch('/alquileres/editar-precio', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `idAlquiler=${id}&nuevoPrecio=${nuevoPrecio}`
-                });
-                const resultado = await respuesta.json();
-                if (resultado.exito) verificarSesion();
-            } catch (error) {
-                console.error(error);
-            }
+      async function modificarPrecio(id, precioActual) {
+        const nuevoPrecio = prompt(`Nuevo precio:`, precioActual);
+        if (nuevoPrecio === null || nuevoPrecio.trim() === "") return;
+        try {
+          const respuesta = await fetch("/alquileres/editar-precio", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `idAlquiler=${id}&nuevoPrecio=${nuevoPrecio}`,
+          });
+          const resultado = await respuesta.json();
+          if (resultado.exito) verificarSesion();
+        } catch (error) {
+          console.error(error);
         }
+      }
 
-        verificarSesion();
+      verificarSesion();
     </script>
-</body>
+  </body>
 </html>
