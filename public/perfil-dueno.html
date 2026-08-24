@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel de Dueño - Alquileres Formosa 🏠</title>
+    <!-- Bootstrap 5 CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-terracota: #9a3412;
+        --color-atardecer: #ea580c;
+        --color-crema-fondo: #fdfbf7;
+      }
+      body {
+        background-color: var(--color-crema-fondo) !important;
+        color: #292524;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .brand-title {
+        color: var(--color-terracota);
+        font-weight: 800;
+        text-decoration: none;
+      }
+      .panel-premium {
+        border-radius: 12px !important;
+        border: none !important;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(124, 45, 18, 0.05);
+      }
+      .btn-primario {
+        background-color: var(--color-terracota);
+        color: white;
+        border: none;
+      }
+      .btn-primario:hover {
+        background-color: #7c2d12;
+        color: white;
+      }
+      .nav-pills .nav-link {
+        color: #57534e;
+        font-weight: 600;
+        border-radius: 8px;
+      }
+      .nav-pills .nav-link.active {
+        background-color: var(--color-terracota);
+        color: white;
+      }
+      .btn-volver {
+        color: var(--color-atardecer);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .card-img-top {
+        height: 180px;
+        object-fit: cover;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container py-4">
+      <!-- Encabezado superior -->
+      <div
+        class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3"
+      >
+        <a href="/" class="brand-title fs-3">Alquileres Formosa 🏠</a>
+        <div>
+          <a href="/" class="btn-volver me-3">← Volver al Catalogo</a>
+          <a href="/logout" class="btn btn-outline-danger btn-sm fw-semibold"
+            >Cerrar Sesión</a
+          >
+        </div>
+      </div>
+
+      <!-- Tarjeta de Introducción / Bienvenida -->
+      <div
+        class="card panel-premium p-4 mb-4 text-white shadow-sm"
+        style="
+          background: linear-gradient(
+            135deg,
+            var(--color-terracota),
+            var(--color-atardecer)
+          );
+        "
+      >
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <h2 class="fw-bold mb-1">¡Hola de nuevo! 👋</h2>
+            <p class="mb-0 opacity-90 fs-5" id="bienvenida-email">
+              Cargando perfil...
+            </p>
+            <small class="opacity-75"
+              >Gestioná tus propiedades publicadas y agregá nuevos alquileres
+              para la comunidad de Formosa.</small
+            >
+          </div>
+          <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <span class="badge bg-light text-dark fs-6 px-3 py-2 shadow-sm"
+              >Rol: Propietario / Dueño</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Menú de Botones / Apartados -->
+      <ul
+        class="nav nav-pills mb-4 gap-2 border-bottom pb-3"
+        id="pills-tab"
+        role="tablist"
+      >
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link active px-4 py-2"
+            id="tab-mis-alquileres"
+            data-bs-toggle="pill"
+            data-bs-target="#sec-mis-alquileres"
+            type="button"
+            role="tab"
+          >
+            🏢 Mis Alquileres Publicados
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link px-4 py-2"
+            id="tab-nuevo-alquiler"
+            data-bs-toggle="pill"
+            data-bs-target="#sec-nuevo-alquiler"
+            type="button"
+            role="tab"
+          >
+            ➕ Agregar Nuevo Alquiler
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link px-4 py-2"
+            id="tab-info-personal"
+            data-bs-toggle="pill"
+            data-bs-target="#sec-info-personal"
+            type="button"
+            role="tab"
+          >
+            👤 Información Personal
+          </button>
+        </li>
+      </ul>
+
+      <!-- Contenido de cada Apartado -->
+      <div class="tab-content" id="pills-tabContent">
+        <!-- APARTADO 1: MIS ALQUILERES PUBLICADOS -->
+        <div
+          class="tab-pane fade show active"
+          id="sec-mis-alquileres"
+          role="tabpanel"
+        >
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold" style="color: var(--color-terracota)">
+              Tus Propiedades en Alquiler
+            </h4>
+          </div>
+          <div class="row g-4" id="contenedor-mis-alquileres">
+            <!-- Se cargan dinámicamente con JS -->
+          </div>
+        </div>
+
+        <!-- APARTADO 2: FORMULARIO NUEVA PUBLICACIÓN -->
+        <div class="tab-pane fade" id="sec-nuevo-alquiler" role="tabpanel">
+          <div class="card panel-premium p-4 shadow-sm max-w-2xl mx-auto">
+            <h4 class="fw-bold mb-3" style="color: var(--color-terracota)">
+              ➕ Publicar una nueva propiedad
+            </h4>
+            <form
+              action="/alquileres"
+              method="POST"
+              enctype="multipart/form-data"
+            >
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-muted"
+                  >Título de la publicación</label
+                >
+                <input
+                  type="text"
+                  name="titulo"
+                  class="form-control"
+                  placeholder="Ej: Monoambiente céntrico cerca de la UNaF"
+                  required
+                />
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold text-muted"
+                    >Precio Mensual ($)</label
+                  >
+                  <input
+                    type="number"
+                    name="precio"
+                    class="form-control"
+                    placeholder="Ej: 180000"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold text-muted"
+                    >Barrio</label
+                  >
+                  <input
+                    type="text"
+                    name="barrio"
+                    class="form-control"
+                    placeholder="Ej: San Miguel, Centro, UNaF"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                  <label class="form-label small fw-semibold text-muted"
+                    >Ambientes</label
+                  >
+                  <select name="ambientes" class="form-select">
+                    <option value="1">1 (Monoambiente)</option>
+                    <option value="2">2 Ambientes</option>
+                    <option value="3">3 Ambientes o más</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-semibold text-muted"
+                    >Tipo de Trato</label
+                  >
+                  <select name="tipoInmueble" class="form-select">
+                    <option value="Directo">Dueño Directo</option>
+                    <option value="Inmobiliaria">Inmobiliaria</option>
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-semibold text-muted"
+                    >¿Tiene Aire Acondicionado?</label
+                  >
+                  <select name="tieneAire" class="form-select">
+                    <option value="si">Sí, cuenta con aire</option>
+                    <option value="no">No posee aire</option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label small fw-semibold text-muted"
+                  >Foto del Inmueble</label
+                >
+                <input
+                  type="file"
+                  name="foto"
+                  class="form-control"
+                  accept="image/*"
+                />
+              </div>
+              <button
+                type="submit"
+                class="btn btn-primario w-100 py-2 fw-bold fs-5"
+              >
+                Publicar Alquiler 🚀
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- APARTADO 3: INFORMACIÓN PERSONAL -->
+        <div class="tab-pane fade" id="sec-info-personal" role="tabpanel">
+          <div class="card panel-premium p-4 shadow-sm">
+            <h4 class="fw-bold mb-4" style="color: var(--color-terracota)">
+              👤 Datos de la Cuenta
+            </h4>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3 border">
+                  <span class="text-muted small d-block"
+                    >Correo Electrónico Registrado</span
+                  >
+                  <strong class="fs-5 text-dark" id="info-email">-</strong>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3 border">
+                  <span class="text-muted small d-block">Tipo de Cuenta</span>
+                  <strong class="fs-5 text-dark">Dueño / Propietario</strong>
+                </div>
+              </div>
+              <div class="col-md-12">
+                <div class="p-3 bg-light rounded-3 border">
+                  <span class="text-muted small d-block"
+                    >Estado de la Cuenta</span
+                  >
+                  <span class="badge bg-success">Activa & Verificada</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle (necesario para que funcionen las pestañas/tabs) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      let usuarioActual = null;
+
+      // Cargar los datos del usuario logueado y sus alquileres
+      async function cargarPanelDueño() {
+        try {
+          // 1. Validar sesión
+          const resUser = await fetch("/quien-soy");
+          const dataUser = await resUser.json();
+
+          if (!dataUser.logueado || dataUser.usuario.rol !== "dueno") {
+            alert("Debes iniciar sesión como Dueño para ver esta página.");
+            window.location.href = "/login.html";
+            return;
+          }
+
+          usuarioActual = dataUser.usuario;
+          document.getElementById("bienvenida-email").innerText =
+            usuarioActual.email;
+          document.getElementById("info-email").innerText = usuarioActual.email;
+
+          // 2. Traer publicaciones y filtrar solo las de este dueño
+          const resAlquileres = await fetch("/alquileres");
+          const alquileres = await resAlquileres.json();
+
+          const misPublicaciones = alquileres.filter(
+            (a) => a.dueno === usuarioActual.email,
+          );
+          renderizarMisAlquileres(misPublicaciones);
+        } catch (error) {
+          console.error("Error al cargar panel:", error);
+        }
+      }
+
+      function renderizarMisAlquileres(lista) {
+        const contenedor = document.getElementById("contenedor-mis-alquileres");
+        contenedor.innerHTML = "";
+
+        if (lista.length === 0) {
+          contenedor.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <p class="text-muted fs-5">Aún no tenés alquileres publicados.</p>
+                        <button class="btn btn-outline-warning text-dark fw-bold" onclick="document.getElementById('tab-nuevo-alquiler').click()">
+                            ¡Publicá tu primer alquiler acá! ➕
+                        </button>
+                    </div>
+                `;
+          return;
+        }
+
+        lista.forEach((a) => {
+          contenedor.innerHTML += `
+                    <div class="col-md-4">
+                        <div class="card h-100 panel-premium shadow-sm overflow-hidden border">
+                            <img src="${a.imagen}" class="card-img-top" alt="Foto">
+                            <div class="card-body p-3">
+                                <span class="badge bg-warning text-dark mb-2">Barrio ${a.barrio}</span>
+                                <h5 class="fw-bold mb-1">${a.titulo}</h5>
+                                <p class="text-success fw-bold fs-4 mb-2">$${a.precio.toLocaleString("es-AR")}</p>
+                                
+                                <div class="d-flex gap-2 mt-3">
+                                    <button onclick="modificarPrecio(${a.id}, ${a.precio})" class="btn btn-sm btn-outline-warning w-50 fw-bold text-dark">Editar $</button>
+                                    <button onclick="borrarAlquiler(${a.id})" class="btn btn-sm btn-outline-danger w-50 fw-bold">Borrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+        });
+      }
+
+      async function modificarPrecio(id, precioActual) {
+        const nuevoPrecio = prompt(
+          "Ingresá el nuevo precio mensual ($):",
+          precioActual,
+        );
+        if (!nuevoPrecio || isNaN(nuevoPrecio)) return;
+
+        const res = await fetch("/alquileres/editar-precio", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idAlquiler: id, nuevoPrecio: nuevoPrecio }),
+        });
+
+        const data = await res.json();
+        if (data.exito) {
+          alert("¡Precio actualizado con éxito!");
+          cargarPanelDueño();
+        } else {
+          alert("No se pudo actualizar el precio.");
+        }
+      }
+
+      async function borrarAlquiler(id) {
+        if (!confirm("¿Estás seguro de eliminar esta publicación?")) return;
+
+        const formData = new URLSearchParams();
+        formData.append("idAlquiler", id);
+
+        const res = await fetch("/alquileres/borrar", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: formData,
+        });
+
+        if (res.ok) {
+          alert("Publicación eliminada correctamente.");
+          cargarPanelDueño();
+        } else {
+          alert("Error al borrar la publicación.");
+        }
+      }
+
+      // Ejecutar al cargar la página
+      cargarPanelDueño();
+    </script>
+  </body>
+</html>

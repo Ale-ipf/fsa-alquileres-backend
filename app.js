@@ -58,7 +58,6 @@ const db = pool.promise();
 // RUTAS DE AUTENTICACIÓN CON MYSQL
 // ==========================================
 
-// 1. Registrar nuevo usuario en la Base de Datos
 app.post('/registro', async (req, res) => {
     const { email, password, rol } = req.body;
     
@@ -89,7 +88,6 @@ app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Buscar al usuario por email y contraseña
         const [usuariosEncontrados] = await db.query(
             'SELECT * FROM usuarios WHERE email = ? AND password = ?', 
             [email, password]
@@ -99,16 +97,24 @@ app.post('/login', async (req, res) => {
             return res.send('<h3>Credenciales incorrectas. <a href="/login.html">Volver</a></h3>');
         }
 
-        // El usuario existe, lo guardamos en la sesión
         const usuario = usuariosEncontrados[0];
+
+        // Si el rol en la base de datos está vacío o es null, le asignamos 'estudiante' por defecto
+        const rolDefinido = (usuario.rol && usuario.rol.trim() !== '') ? usuario.rol : 'estudiante';
+
         req.session.usuarioLogueado = {
             id: usuario.id,
             email: usuario.email,
-            rol: usuario.rol
-            // Nota: El array de favoritos en memoria desaparece; luego lo manejaremos con una tabla puente si hiciera falta.
+            rol: rolDefinido
         };
 
-        res.redirect('/');
+        // Redirección según rol
+        if (rolDefinido === 'dueno') {
+            res.redirect('/perfil-dueno.html');
+        } else {
+            res.redirect('/perfil-estudiante.html');
+        }
+
     } catch (error) {
         console.error("Error en el login:", error);
         res.status(500).send('<h3>Error interno del servidor al iniciar sesión.</h3>');
@@ -288,6 +294,14 @@ app.post('/usuarios/favoritos/toggle', (req, res) => {
     }
 
     res.json({ exito: true, agregado: agregado, favoritos: favoritos });
+});
+
+// ==========================================
+// RUTA TEMPORAL DE FAVORITOS
+// ==========================================
+app.get('/usuarios/favoritos', (req, res) => {
+    // Retorna un array vacío para evitar errores mientras implementamos la tabla de favoritos
+    res.json([]);
 });
 
 // LEVANTAR EL SERVIDOR

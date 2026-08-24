@@ -439,52 +439,36 @@
       async function verificarSesion() {
         try {
           const res = await fetch("/quien-soy");
-          const info = await res.json();
+          const data = await res.json();
+          const divSesion = document.getElementById("contenedor-sesion"); // Asegurate que coincida con el id de tu HTML
 
-          const barraUsuario = document.getElementById("barra-usuario");
-          const textoBienvenida = document.getElementById("texto-bienvenida");
-          const botonesInvitado = document.getElementById("botones-invitado");
-          const seccionPublicar = document.getElementById("seccion-publicar");
-          const emailSesionPublicar = document.getElementById(
-            "email-sesion-publicar",
-          );
-          const panelFiltros = document.getElementById("panel-filtros");
-          const contenedorFiltroFavoritos = document.getElementById(
-            "contenedor-filtro-favoritos",
-          );
+          if (data.logueado) {
+            const urlPerfil =
+              data.usuario.rol === "dueno"
+                ? "/perfil-dueno.html"
+                : "/perfil-estudiante.html";
+            const textoBoton =
+              data.usuario.rol === "dueno"
+                ? "👤 Mi Panel de Dueño"
+                : "🎓 Mi Panel Estudiantil";
 
-          if (info.logueado) {
-            usuarioActual = info.usuario;
-            botonesInvitado.classList.add("d-none");
-            barraUsuario.classList.remove("d-none");
-            barraUsuario.classList.add("d-flex");
-            textoBienvenida.innerText = `¡Hola, ${info.usuario.email} (${info.usuario.rol.toUpperCase()})! 👋`;
-
-            if (info.usuario.rol === "dueno") {
-              seccionPublicar.classList.remove("d-none");
-              emailSesionPublicar.innerText = info.usuario.email;
-              panelFiltros.classList.add("d-none");
-              contenedorFiltroFavoritos.classList.add("d-none");
-            } else {
-              seccionPublicar.classList.add("d-none");
-              panelFiltros.classList.remove("d-none");
-              contenedorFiltroFavoritos.classList.remove("d-none"); // Mostrar filtro de favoritos a estudiantes
-              await obtenerFavoritos(); // Cargamos sus guardados
-            }
+            divSesion.innerHTML = `
+                <span class="me-2 fw-semibold text-dark">Hola, ${data.usuario.email}</span>
+                <a href="${urlPerfil}" class="btn btn-sm btn-warning text-dark fw-bold me-2">${textoBoton}</a>
+                <a href="/logout" class="btn btn-sm btn-outline-danger fw-semibold">Cerrar Sesión</a>
+            `;
           } else {
-            usuarioActual = null;
-            botonesInvitado.classList.remove("d-none");
-            barraUsuario.classList.add("d-none");
-            seccionPublicar.classList.add("d-none");
-            panelFiltros.classList.remove("d-none");
-            contenedorFiltroFavoritos.classList.add("d-none");
-            misFavoritosIds = [];
+            divSesion.innerHTML = `
+                <a href="/login.html" class="btn btn-sm btn-outline-primary me-2 fw-semibold">Iniciar Sesión</a>
+                <a href="/registro.html" class="btn btn-sm btn-warning text-dark fw-bold">Registrarse</a>
+            `;
           }
-        } catch (e) {
-          console.error("Error verificando sesión", e);
+        } catch (error) {
+          console.error("Error al verificar sesión:", error);
         }
-        obtenerAlquileres();
       }
+
+      verificarSesion();
 
       // 🌟 Cargar favoritos desde el servidor
       async function obtenerFavoritos() {
